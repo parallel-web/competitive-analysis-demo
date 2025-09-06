@@ -176,26 +176,26 @@
 
             <!-- Company Input -->
             <div class="input-group mb-8">
-                <input 
-                    type="text" 
-                    class="company-input" 
-                    placeholder="Enter company domain (e.g., openai.com, stripe.com)"
-                    id="company-input"
-                    autocomplete="off"
-                />
+                <input type="text" class="company-input"
+                    placeholder="Enter company domain (e.g., openai.com, stripe.com)" id="company-input"
+                    autocomplete="off" />
                 <button class="analyze-btn w-full" id="analyze-btn">
                     <span class="btn-text">🔍 Analyze Competition</span>
                     <span class="btn-loading hidden">
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
                         </svg>
                         Analyzing...
                     </span>
                 </button>
             </div>
 
-            <p class="text-sm text-gray-500">For demo purposes, you get 5 free analyses</p>
+            <p class="text-sm text-gray-500">For demo purposes, you get 5 free analyses (X Login Required)</p>
         </div>
     </section>
 
@@ -271,35 +271,43 @@
 
             <div class="grid md:grid-cols-4 gap-8">
                 <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center text-2xl font-bold rounded-full">
+                    <div
+                        class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center text-2xl font-bold rounded-full">
                         1
                     </div>
                     <h4 class="font-medium mb-2">Company Research</h4>
-                    <p class="text-gray-600 text-sm">AI researches the company's business model, products, and market position</p>
+                    <p class="text-gray-600 text-sm">AI researches the company's business model, products, and market
+                        position</p>
                 </div>
 
                 <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-500 to-green-600 text-white flex items-center justify-center text-2xl font-bold rounded-full">
+                    <div
+                        class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-500 to-green-600 text-white flex items-center justify-center text-2xl font-bold rounded-full">
                         2
                     </div>
                     <h4 class="font-medium mb-2">Find Competitors</h4>
-                    <p class="text-gray-600 text-sm">Identifies direct and indirect competitors in the same market space</p>
+                    <p class="text-gray-600 text-sm">Identifies direct and indirect competitors in the same market space
+                    </p>
                 </div>
 
                 <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 signal-text border-2 border-current flex items-center justify-center text-2xl font-bold rounded-full">
+                    <div
+                        class="w-16 h-16 mx-auto mb-4 signal-text border-2 border-current flex items-center justify-center text-2xl font-bold rounded-full">
                         3
                     </div>
                     <h4 class="font-medium mb-2">Reddit Mining</h4>
-                    <p class="text-gray-600 text-sm">Analyzes Reddit discussions for real user opinions and market insights</p>
+                    <p class="text-gray-600 text-sm">Analyzes Reddit discussions for real user opinions and market
+                        insights</p>
                 </div>
 
                 <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-purple-600 text-white flex items-center justify-center text-2xl font-bold rounded-full">
+                    <div
+                        class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-purple-600 text-white flex items-center justify-center text-2xl font-bold rounded-full">
                         4
                     </div>
                     <h4 class="font-medium mb-2">Generate Report</h4>
-                    <p class="text-gray-600 text-sm">Creates comprehensive competitive analysis with actionable insights</p>
+                    <p class="text-gray-600 text-sm">Creates comprehensive competitive analysis with actionable insights
+                    </p>
                 </div>
             </div>
         </div>
@@ -323,7 +331,8 @@
         <div class="max-w-6xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 <span class="text-sm text-gray-600">Powered by AI & Reddit</span>
-                <a href="https://github.com/janwilmake/competitor-analysis" target="_blank" class="text-orange-500 hover:text-orange-600 underline">
+                <a href="https://github.com/janwilmake/competitor-analysis" target="_blank"
+                    class="text-orange-500 hover:text-orange-600 underline">
                     View on GitHub
                 </a>
             </div>
@@ -346,7 +355,7 @@
             domain = domain.replace(/^www\./, '');
             // Remove trailing slash
             domain = domain.replace(/\/$/, '');
-            
+
             // Basic domain validation
             const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\.[a-zA-Z]{2,})+$/;
             return domainRegex.test(domain) ? domain : null;
@@ -363,7 +372,7 @@
             }
         }
 
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const rawInput = input.value.trim();
             if (!rawInput) {
                 alert('Please enter a company domain');
@@ -377,21 +386,21 @@
             }
 
             setLoading(true);
-            
+
             // Convert domain to slug format
             const slug = domain.replace(/\./g, '-');
-            
+
             window.location.href = `/new?company=${encodeURIComponent(domain)}`;
         });
 
-        input.addEventListener('keypress', function(e) {
+        input.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 button.click();
             }
         });
 
         // Auto-format input
-        input.addEventListener('input', function() {
+        input.addEventListener('input', function () {
             let value = this.value;
             // Remove protocol if user types it
             value = value.replace(/^https?:\/\//, '');

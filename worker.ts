@@ -228,7 +228,7 @@ async function handleNew(
   const parallel = new Parallel({ apiKey: env.PARALLEL_API_KEY });
 
   try {
-    const taskRun = await parallel.taskRun.create(
+    const taskRun = await parallel.beta.taskRun.create(
       {
         input: `Conduct comprehensive competitive intelligence analysis for company: ${domain} including a Reddit sentiment analysis`,
         processor: "pro",
@@ -434,8 +434,6 @@ async function handleNew(
       }
     );
 
-    console.log({ taskRun });
-
     await do_stub.createAnalysis({
       slug,
       company_domain: domain,
@@ -452,9 +450,7 @@ async function handleNew(
 
     return new Response(null, {
       status: 302,
-      headers: {
-        Location: `/analysis/${slug}`,
-      },
+      headers: { Location: `/analysis/${slug}` },
     });
   } catch (error) {
     console.error("Error creating analysis task:", error);
