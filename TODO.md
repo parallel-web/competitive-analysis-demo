@@ -14,6 +14,7 @@ Data quality:
 - Either reduce task size and complexity, or split up into task per competitor.
 - Validate results: Use LLM and remove non-existing companies or have a way to filter out bad results, not making them public
 - Figure out what to do with 'low confidence' outputs. Can we just hide it and assume the data is correct? A lot of fields have low confidence
+- Determine if we should implement some sort of a retry mechanism if tasks have bad outputs, and what do we show the user if certain competitor analysis cannot be completed?
 
 OAuth:
 
