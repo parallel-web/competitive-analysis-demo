@@ -18,7 +18,8 @@ Data quality:
 
 OAuth:
 
-- The OAuth I'm using doesn't work on subpath so will need tweaking to make it work on oss.parallel.ai/competitors (unless we go for another domain)
+- The OAuth I'm using doesn't work on subpath so will need tweaking to make it work on oss.parallel.ai/competitors
+- Simpler route: go for root subdomain or separate domain!
 
 Other larger potential improvements:
 
