@@ -4,8 +4,8 @@
 - 404 page for any valid hostname that includes link to `/new`
 - Interlinking to hostname slug of referenced companies
 - Add ability to refresh entries older after 14 days, add warning for older entries
-- Parallel branding
 - 401 page at `/new` should have dialog explaining login is required rather than direct redirect (to use MCP on their behalf, get 5 searches for free, get their profile info)
+- Decide: parallel branding (hide logo until official @p0 launch) or separate app?
 
 # Bigger required refinements
 
