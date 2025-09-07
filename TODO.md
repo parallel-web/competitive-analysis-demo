@@ -9,6 +9,10 @@
 
 # Bigger required refinements
 
+Find a better Reddit MCP:
+
+- The current one has rate limits (shows "banned"). Need to find one that actually works. Or maybe replace with X MCP if none can be found
+
 Data quality:
 
 - Either reduce task size and complexity, or split up into task per competitor.
