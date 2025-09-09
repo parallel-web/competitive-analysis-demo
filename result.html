@@ -55,10 +55,13 @@
             font-family: 'FT System Mono', monospace;
             background-color: var(--off-white);
             color: var(--index-black);
+            line-height: 1.5;
+            font-size: 14px;
         }
 
         .gerstner {
             font-family: 'Gerstner Programm', serif;
+            line-height: 1.2;
         }
 
         .neural-bg {
@@ -88,92 +91,121 @@
         }
 
         .company-header {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border: 1px solid #cbd5e1;
-            border-radius: 16px;
-            padding: 2rem;
+            background: #f8f8f6;
+            border: 2px solid var(--neural);
+            border-radius: 6px;
+            padding: 32px;
+            margin-bottom: 48px;
         }
 
         .company-logo {
             width: 64px;
             height: 64px;
-            background: linear-gradient(135deg, var(--signal), #ff8c42);
-            border-radius: 12px;
+            background: var(--signal);
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             color: white;
-            font-size: 1.5rem;
+            font-size: 24px;
+        }
+
+        .company-logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .company-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 2px solid var(--neural);
         }
 
         .analysis-card {
             background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            position: relative;
+            border: 2px solid #e8e6e1;
+            border-radius: 4px;
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: border-color 0.2s ease;
         }
 
         .analysis-card:hover {
-            border-color: var(--signal);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: var(--neural);
         }
 
         .competitor-card {
             background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
+            border: 2px solid #e8e6e1;
+            border-radius: 4px;
+            padding: 24px;
+            transition: border-color 0.2s ease;
+            margin-bottom: 16px;
         }
 
         .competitor-card:hover {
             border-color: var(--signal);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .competitor-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
 
         .confidence-badge {
             display: inline-flex;
             align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.5px;
+            margin-left: 12px;
+            border: 1px solid;
         }
 
         .confidence-high {
-            background: #dcfce7;
+            background: #f0f9f4;
             color: #166534;
+            border-color: #22c55e;
         }
 
         .confidence-medium {
-            background: #fef3c7;
+            background: #fffbeb;
             color: #92400e;
+            border-color: #f59e0b;
+        }
+
+        .confidence-low {
+            background: #fef2f2;
+            color: #991b1b;
+            border-color: #ef4444;
         }
 
         .reasoning-section {
-            background: #f8fafc;
+            background: #f8f8f6;
             border-left: 4px solid var(--neural);
-            border-radius: 0 8px 8px 0;
-            padding: 1rem;
-            margin-top: 1rem;
+            padding: 16px;
+            margin-top: 16px;
+            font-size: 13px;
         }
 
         .citation-item {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            transition: all 0.2s ease;
+            background: #f5f5f3;
+            border: 1px solid #d6d3ce;
+            border-radius: 3px;
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: border-color 0.2s ease;
         }
 
         .citation-item:hover {
-            background: #e2e8f0;
             border-color: var(--signal);
         }
 
@@ -181,7 +213,7 @@
             color: var(--signal);
             text-decoration: none;
             font-weight: 500;
-            font-size: 0.875rem;
+            font-size: 13px;
         }
 
         .citation-link:hover {
@@ -190,36 +222,39 @@
 
         .excerpt-text {
             font-style: italic;
-            background: #f9fafb;
+            background: #fafafa;
             border-left: 2px solid #d1d5db;
-            padding: 0.5rem 0.75rem;
-            margin-top: 0.5rem;
-            font-size: 0.875rem;
-            line-height: 1.6;
-            color: #374151;
+            padding: 8px 12px;
+            margin-top: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #6b7280;
         }
 
         .field-header {
             display: flex;
             align-items: center;
-            justify-content: between;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            justify-content: space-between;
+            margin-bottom: 16px;
         }
 
         .expand-toggle {
             background: none;
-            border: none;
+            border: 1px solid var(--signal);
             color: var(--signal);
             cursor: pointer;
-            font-size: 0.875rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            transition: background-color 0.2s ease;
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .expand-toggle:hover {
-            background: rgba(251, 99, 27, 0.1);
+            background: var(--signal);
+            color: white;
         }
 
         .collapsible-content {
@@ -232,97 +267,270 @@
             max-height: 2000px;
         }
 
-        .insight-card {
-            background: white;
-            border-left: 4px solid var(--signal);
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .market-position {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border: 1px solid #bae6fd;
-        }
-
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
+            gap: 16px;
+            margin-bottom: 48px;
         }
 
         .stat-item {
             background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
+            padding: 20px;
+            border-radius: 4px;
+            border: 2px solid #e8e6e1;
         }
 
         .stat-label {
-            font-size: 0.75rem;
+            font-size: 11px;
             text-transform: uppercase;
             color: #6b7280;
             font-weight: 600;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
         }
 
         .stat-value {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-top: 0.25rem;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--index-black);
+        }
+
+        .old-analysis-banner {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 48px;
+        }
+
+        .refresh-btn {
+            background: var(--signal);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 3px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            opacity: 0.8;
+        }
+
+        .section-spacing {
+            margin-bottom: 56px;
+        }
+
+        .content-wrapper {
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .section-title {
+            margin-bottom: 32px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e8e6e1;
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .content-text {
+            white-space: pre-line;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #374151;
+        }
+
+        .field-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--index-black);
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            space-x: 12px;
+        }
+
+        .parallel-symbol {
+            width: 32px;
+            height: 32px;
+            /* background: url('https://assets.p0web.com/dark-parallel-symbol-270.svg') no-repeat center; */
+            background-size: contain;
+        }
+
+        .cta-section {
+            text-align: center;
+            margin-top: 80px;
+            padding: 64px 0;
+            border-top: 2px solid #e8e6e1;
+        }
+
+        .cta-btn {
+            background: var(--signal);
+            color: white;
+            padding: 16px 32px;
+            font-weight: 500;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s ease;
+        }
+
+        .cta-btn:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 0 16px;
+            }
+
+            .company-header {
+                padding: 24px;
+                margin-bottom: 32px;
+            }
+
+            .analysis-card {
+                padding: 20px;
+                margin-bottom: 16px;
+            }
+
+            .competitor-card {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-bottom: 32px;
+            }
+
+            .section-spacing {
+                margin-bottom: 40px;
+            }
+
+            .section-title {
+                font-size: 20px;
+                margin-bottom: 24px;
+            }
+
+            body {
+                font-size: 13px;
+            }
+        }
+
+        .error-icon,
+        .loading-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .loading-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            background: #f3f4f6;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid var(--signal);
+        }
+
+        .error-icon {
+            background: #fee2e2;
+            color: #dc2626;
         }
     </style>
 </head>
 
 <body class="min-h-screen">
     <!-- Header -->
-    <header class="p-6 border-b border-gray-200">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <a href="/" class="gerstner text-2xl font-medium hover:text-gray-600 flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg"></div>
-                    <span>Competitor Analysis</span>
+    <header class="py-6 border-b-2 border-gray-200">
+        <div class="content-wrapper flex items-center justify-between">
+            <div class="header-logo">
+                <div class="parallel-symbol"></div>
+                <a href="/" class="gerstner text-xl font-medium hover:text-gray-600 ml-3">
+                    Competitor Analysis
                 </a>
             </div>
-            <a href="/" class="text-sm text-gray-600 hover:text-gray-800">← Back to analyses</a>
+            <a href="/" class="text-gray-600 hover:text-gray-800 font-medium text-sm uppercase tracking-wide">
+                Back to analyses
+            </a>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="py-12 px-6">
-        <div class="max-w-6xl mx-auto">
+    <main class="py-12">
+        <div class="content-wrapper">
+
+            <!-- Old Analysis Banner -->
+            <div id="old-analysis-banner" class="old-analysis-banner hidden">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="mr-4">
+                            <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.414L11 9.586V6z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-medium text-amber-800 gerstner text-sm uppercase tracking-wide">
+                                Analysis outdated
+                            </p>
+                            <p class="text-amber-700 text-xs mt-1">
+                                This analysis is over 2 weeks old. Market conditions may have changed.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="#" id="refresh-link" class="refresh-btn">
+                        Refresh
+                    </a>
+                </div>
+            </div>
 
             <!-- Loading State -->
-            <div id="loading-state" class="text-center py-16 hidden">
-                <div
-                    class="loading-spinner w-12 h-12 border-4 border-gray-300 border-t-orange-500 rounded-full mx-auto mb-6">
-                </div>
-                <h2 class="gerstner text-2xl font-medium mb-4">Analyzing Competition...</h2>
-                <p class="text-gray-600 max-w-md mx-auto mb-4">
+            <div id="loading-state" class="text-center py-24 hidden">
+                <div class="loading-icon loading-spinner mx-auto mb-8"></div>
+                <h2 class="gerstner text-2xl font-medium mb-6">Analyzing Competition...</h2>
+                <p class="text-gray-600 max-w-lg mx-auto mb-6 text-sm leading-relaxed">
                     Our AI is researching the company, identifying competitors, and mining Reddit for insights.
                 </p>
-                <div class="max-w-sm mx-auto bg-gray-200 rounded-full h-2 mb-4">
-                    <div class="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full animate-pulse"
+                <div class="max-w-md mx-auto bg-gray-200 rounded h-2 mb-6">
+                    <div class="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded animate-pulse"
                         style="width: 45%"></div>
                 </div>
-                <p class="text-sm text-gray-500">This will take a bit. Come back in 30 minutes!</p>
+                <p class="text-gray-500 text-xs uppercase tracking-wide">This will take about 30 minutes</p>
             </div>
 
             <!-- Error State -->
-            <div id="error-state" class="text-center py-16 hidden">
-                <div
-                    class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div id="error-state" class="text-center py-24 hidden">
+                <div class="error-icon mb-8">
                     <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
                             clip-rule="evenodd" />
                     </svg>
                 </div>
-                <h2 class="gerstner text-2xl font-medium mb-4">Analysis Failed</h2>
-                <p class="text-gray-600 mb-6" id="error-message"></p>
-                <a href="/"
-                    class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 font-medium hover:opacity-90 transition-colors rounded-lg">
+                <h2 class="gerstner text-2xl font-medium mb-6">Analysis Failed</h2>
+                <p class="text-gray-600 mb-8 text-sm" id="error-message"></p>
+                <a href="/" class="cta-btn">
                     Try Another Company
                 </a>
             </div>
@@ -331,27 +539,35 @@
             <div id="results-state" class="hidden">
 
                 <!-- Company Header -->
-                <div class="company-header mb-12">
+                <div class="company-header">
                     <div class="flex items-start space-x-6">
-                        <div class="company-logo" id="company-logo">
-                            <!-- Company initial will be injected -->
+                        <div class="company-logo-container">
+                            <img id="company-favicon" class="company-icon hidden" alt="Company logo">
+                            <div class="company-logo" id="company-logo">
+                                <!-- Company initial will be injected -->
+                            </div>
                         </div>
                         <div class="flex-1">
-                            <h1 class="gerstner text-3xl font-medium mb-2" id="company-name">
+                            <h1 class="gerstner text-3xl font-medium mb-3" id="company-name">
                                 <!-- Company name will be injected -->
                             </h1>
-                            <p class="text-gray-600 mb-2" id="company-domain">
+                            <p class="text-gray-600 mb-2 font-mono text-sm" id="company-domain">
                                 <!-- Domain will be injected -->
                             </p>
-                            <p class="text-sm text-gray-500 mb-4" id="company-location">
+                            <p class="text-gray-500 mb-6 text-xs uppercase tracking-wide" id="company-location">
                                 <!-- Location will be injected -->
                             </p>
+                            <div class="flex items-center space-x-4">
+                                <a href="#" id="linkedin-link"
+                                    class="text-signal hover:underline font-medium text-xs uppercase tracking-wide hidden"
+                                    target="_blank">LinkedIn</a>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Company Stats -->
-                <div class="stats-grid mb-12">
+                <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">Founded</div>
                         <div class="stat-value" id="founded-year">-</div>
@@ -368,31 +584,31 @@
                         <div class="stat-label">Total Funding</div>
                         <div class="stat-value" id="total-funding">-</div>
                     </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Latest Round</div>
+                        <div class="stat-value" id="latest-funding">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Valuation</div>
+                        <div class="stat-value" id="current-valuation">-</div>
+                    </div>
                 </div>
 
                 <!-- Company Overview -->
-                <section class="market-position p-8 rounded-lg mb-12">
-                    <h2 class="gerstner text-2xl font-medium mb-6 flex items-center">
-                        <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Company Overview
-                    </h2>
+                <section class="section-spacing">
+                    <h2 class="gerstner section-title">Company Overview</h2>
                     <div class="analysis-card" id="business-description-card">
-                        <!-- Business description with reasoning will be injected -->
+                        <!-- Business description will be injected -->
+                    </div>
+                    <div class="analysis-card" id="unique-value-proposition-card">
+                        <!-- Unique value proposition will be injected -->
                     </div>
                 </section>
 
                 <!-- Market Analysis -->
-                <section class="mb-12">
-                    <h2 class="gerstner text-2xl font-medium mb-8 flex items-center">
-                        <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-                        </svg>
-                        Market Analysis
-                    </h2>
-                    <div class="grid lg:grid-cols-2 gap-8">
+                <section class="section-spacing">
+                    <h2 class="gerstner section-title">Market Analysis</h2>
+                    <div class="grid lg:grid-cols-2 gap-6">
                         <div class="analysis-card" id="target-market-card">
                             <!-- Target market analysis will be injected -->
                         </div>
@@ -400,57 +616,52 @@
                             <!-- Market size analysis will be injected -->
                         </div>
                     </div>
+                    <div class="analysis-card" id="recent-news-card">
+                        <!-- Recent news will be injected -->
+                    </div>
+
+
+                </section>
+
+                <!-- Strategic Analysis -->
+                <section class="section-spacing">
+                    <h2 class="gerstner section-title">Market Opportunities</h2>
+                    <div class="analysis-card" id="market-opportunities-card">
+                        <!-- Market opportunities will be injected -->
+                    </div>
                 </section>
 
                 <!-- Competitors Analysis -->
-                <section class="mb-12">
-                    <h2 class="gerstner text-2xl font-medium mb-8 flex items-center">
-                        <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-                        </svg>
-                        Key Competitors
-                    </h2>
-                    <div class="grid lg:grid-cols-1 gap-8" id="competitors-container">
-                        <!-- Competitors will be injected here -->
+                <section class="section-spacing">
+                    <h2 class="gerstner section-title">Competitive Landscape</h2>
+                    <div class="analysis-card" id="competitive-landscape-card">
+                        <!-- Competitive landscape overview will be injected -->
+                    </div>
+                    <div id="competitors-container">
+                        <!-- Individual competitors will be injected here -->
                     </div>
                 </section>
 
                 <!-- Reddit Analysis -->
-                <section class="mb-12">
-                    <h2 class="gerstner text-2xl font-medium mb-8 flex items-center">
-                        <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        Reddit Community Analysis
-                    </h2>
+                <section class="section-spacing">
+                    <h2 class="gerstner section-title">Reddit Insights</h2>
                     <div class="analysis-card" id="reddit-analysis-card">
                         <!-- Reddit analysis will be injected here -->
                     </div>
                 </section>
 
                 <!-- Executive Summary -->
-                <section class="mb-12">
-                    <h2 class="gerstner text-2xl font-medium mb-8 flex items-center">
-                        <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        Executive Summary
-                    </h2>
+                <section class="section-spacing">
+                    <h2 class="gerstner section-title">Executive Summary</h2>
                     <div class="analysis-card" id="executive-summary-card">
                         <!-- Executive summary will be injected here -->
                     </div>
                 </section>
 
                 <!-- CTA Section -->
-                <div class="text-center mt-16 py-12 border-t border-gray-200">
-                    <h3 class="gerstner text-2xl font-medium mb-6">Ready to analyze another company?</h3>
-                    <a href="/"
-                        class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 font-medium hover:opacity-90 transition-colors rounded-lg">
+                <div class="cta-section">
+                    <h3 class="gerstner text-xl font-medium mb-8">Ready to analyze another company?</h3>
+                    <a href="/" class="cta-btn">
                         Analyze Competition
                     </a>
                 </div>
@@ -460,16 +671,16 @@
     </main>
 
     <!-- Footer -->
-    <footer class="py-8 px-6 border-t border-gray-200">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
+    <footer class="py-8 border-t-2 border-gray-200">
+        <div class="content-wrapper flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <span class="text-sm text-gray-600">Powered by Parallel AI</span>
+                <span class="text-gray-600 text-xs uppercase tracking-wide">Powered by Parallel AI</span>
                 <a href="https://github.com/janwilmake/competitor-analysis" target="_blank"
-                    class="text-orange-500 hover:text-orange-600 underline">
-                    View on GitHub
+                    class="text-signal hover:text-orange-600 underline text-xs">
+                    GitHub
                 </a>
             </div>
-            <div class="text-sm text-gray-600">
+            <div class="text-gray-600 text-xs uppercase tracking-wide">
                 Built for strategic insights
             </div>
         </div>
@@ -479,6 +690,16 @@
         // Get data injected from server
         const data = window.data;
         const analysis = data.analysis;
+
+        // Helper function to convert newlines to HTML
+        function convertMarkdown(text) {
+            if (!text) return '';
+
+            return text
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')  // **bold** -> <strong>
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')              // *italic* -> <em>
+                .replace(/\n/g, '<br>');                           // newlines -> <br>
+        }
 
         // Helper function to get basis for a field
         function getBasisForField(fieldName) {
@@ -494,32 +715,26 @@
 
             const cardHTML = `
                 <div class="field-header">
-                    <h3 class="font-semibold text-lg">${title}</h3>
-                    ${basis?.confidence && basis.confidence !== "low" ? `<span class="confidence-badge confidence-${basis.confidence}">${basis.confidence} confidence</span>` : ''}
-                    ${basis && (basis.citations.length > 0 || basis.reasoning) ? '<button class="expand-toggle" onclick="toggleDetails(this)">Show Details</button>' : ''}
+                    <h3 class="field-title gerstner">${title}</h3>
+                    ${basis ? '<button class="expand-toggle" onclick="toggleDetails(this)">Details</button>' : ''}
                 </div>
-                <div class="content-text text-gray-700 leading-relaxed">${content}</div>
+                <div class="content-text">${convertMarkdown(content)}</div>
                 ${basis ? `
                     <div class="collapsible-content">
+                        ${basis.confidence ? `
+                            <div class="mt-4">
+                                Confidence <span class="confidence-badge confidence-${basis.confidence}">${basis.confidence}</span>
+                            </div>
+                        ` : ''}
                         ${basis.reasoning ? `
                             <div class="reasoning-section">
-                                <h4 class="font-semibold text-sm mb-2 flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    AI Reasoning
-                                </h4>
-                                <p class="text-sm text-gray-600">${basis.reasoning}</p>
+                                <h4 class="font-semibold mb-2 text-xs uppercase tracking-wide">AI Reasoning</h4>
+                                <p class="text-gray-600">${convertMarkdown(basis.reasoning)}</p>
                             </div>
                         ` : ''}
                         ${basis.citations && basis.citations.length > 0 ? `
                             <div class="mt-4">
-                                <h4 class="font-semibold text-sm mb-3 flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    Sources (${basis.citations.length})
-                                </h4>
+                                <h4 class="font-semibold mb-3 text-xs uppercase tracking-wide">Sources (${basis.citations.length})</h4>
                                 <div class="space-y-2">
                                     ${basis.citations.map((citation, index) => `
                                         <div class="citation-item">
@@ -529,7 +744,7 @@
                                             ${citation.excerpts && citation.excerpts.length > 0 ? `
                                                 <div class="mt-2">
                                                     ${citation.excerpts.map(excerpt => `
-                                                        <div class="excerpt-text">"${excerpt}"</div>
+                                                        <div class="excerpt-text">"${convertMarkdown(excerpt)}"</div>
                                                     `).join('')}
                                                 </div>
                                             ` : ''}
@@ -546,92 +761,46 @@
         }
 
         // Helper function to create competitor card
-        function createCompetitorCard(competitor, competitorBasis) {
-            const competitorDiv = document.createElement('div');
-            competitorDiv.className = 'competitor-card mb-8';
+        function createCompetitorCard(competitor) {
+            // Extract domain from website URL
+            let domain = competitor.website;
+            try {
+                domain = domain.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+            } catch (e) {
+                // Keep original if parsing fails
+            }
 
-            // Get basis for competitor fields
-            const strengthsBasis = competitorBasis ? competitorBasis.find(b => b.field.includes('strengths')) : null;
-            const weaknessesBasis = competitorBasis ? competitorBasis.find(b => b.field.includes('weaknesses')) : null;
-            const redditBasis = competitorBasis ? competitorBasis.find(b => b.field.includes('reddit_sentiment')) : null;
+            if (!domain) {
+                console.error("competitor has no website", competitor);
+                return;
+            }
 
-            competitorDiv.innerHTML = `
-                <div class="flex items-start space-x-4 mb-6">
-                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-700">
-                        ${competitor.name.charAt(0)}
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-semibold text-xl mb-2">${competitor.name}</h3>
-                        <a href="${competitor.website}" target="_blank" class="text-sm text-orange-500 hover:underline mb-2 inline-block">${competitor.website}</a>
-                        <p class="text-gray-700">${competitor.description}</p>
-                        ${competitor.market_share ? `<p class="text-sm text-gray-600 mt-2"><strong>Market Position:</strong> ${competitor.market_share}</p>` : ''}
-                    </div>
-                </div>
+            // Create clickable link for competitor
+            const competitorLink = document.createElement('a');
+            competitorLink.href = `/analysis/${domain}`;
+            competitorLink.className = 'competitor-link';
 
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="analysis-card">
-                        <div class="field-header">
-                            <h4 class="font-semibold text-green-700">Strengths</h4>
-                            ${strengthsBasis ? `<span class="confidence-badge confidence-${strengthsBasis.confidence || 'medium'}">${strengthsBasis.confidence || 'medium'}</span>` : ''}
+            competitorLink.innerHTML = `
+                <div class="competitor-card cursor-pointer">
+                    <div class="flex items-start space-x-4">
+                        <div class="company-logo-container relative">
+                            <img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64" 
+                                 alt="${competitor.name} logo"
+                                 class="w-12 h-12 rounded object-cover border border-gray-300"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="w-12 h-12 bg-gray-200 rounded hidden items-center justify-center font-bold text-gray-700 text-sm">
+                                ${competitor.name.charAt(0)}
+                            </div>
                         </div>
-                        <p class="text-sm text-gray-700 mb-3">${competitor.strengths}</p>
-                        ${strengthsBasis && strengthsBasis.citations && strengthsBasis.citations.length > 0 ? `
-                            <details class="mt-3">
-                                <summary class="text-xs cursor-pointer text-orange-500 hover:underline">View Sources (${strengthsBasis.citations.length})</summary>
-                                <div class="mt-2 space-y-1">
-                                    ${strengthsBasis.citations.map((citation, index) => `
-                                        <a href="${citation.url}" target="_blank" class="block text-xs text-orange-500 hover:underline">
-                                            [${index + 1}] ${citation.title || 'Source'}
-                                        </a>
-                                    `).join('')}
-                                </div>
-                            </details>
-                        ` : ''}
-                    </div>
-
-                    <div class="analysis-card">
-                        <div class="field-header">
-                            <h4 class="font-semibold text-red-700">Weaknesses</h4>
-                            ${weaknessesBasis ? `<span class="confidence-badge confidence-${weaknessesBasis.confidence || 'medium'}">${weaknessesBasis.confidence || 'medium'}</span>` : ''}
+                        <div class="flex-1">
+                            <h3 class="gerstner text-lg font-medium mb-2">${competitor.name}</h3>
+                            <span class="text-signal hover:underline text-xs font-mono">${competitor.website}</span>
                         </div>
-                        <p class="text-sm text-gray-700 mb-3">${competitor.weaknesses}</p>
-                        ${weaknessesBasis && weaknessesBasis.citations && weaknessesBasis.citations.length > 0 ? `
-                            <details class="mt-3">
-                                <summary class="text-xs cursor-pointer text-orange-500 hover:underline">View Sources (${weaknessesBasis.citations.length})</summary>
-                                <div class="mt-2 space-y-1">
-                                    ${weaknessesBasis.citations.map((citation, index) => `
-                                        <a href="${citation.url}" target="_blank" class="block text-xs text-orange-500 hover:underline">
-                                            [${index + 1}] ${citation.title || 'Source'}
-                                        </a>
-                                    `).join('')}
-                                </div>
-                            </details>
-                        ` : ''}
-                    </div>
-
-                    <div class="analysis-card">
-                        <div class="field-header">
-                            <h4 class="font-semibold text-blue-700">Reddit Sentiment</h4>
-                            ${redditBasis ? `<span class="confidence-badge confidence-${redditBasis.confidence || 'medium'}">${redditBasis.confidence || 'medium'}</span>` : ''}
-                        </div>
-                        <p class="text-sm text-gray-700 mb-3">${competitor.reddit_sentiment}</p>
-                        ${redditBasis && redditBasis.citations && redditBasis.citations.length > 0 ? `
-                            <details class="mt-3">
-                                <summary class="text-xs cursor-pointer text-orange-500 hover:underline">View Reddit Sources (${redditBasis.citations.length})</summary>
-                                <div class="mt-2 space-y-1">
-                                    ${redditBasis.citations.map((citation, index) => `
-                                        <a href="${citation.url}" target="_blank" class="block text-xs text-orange-500 hover:underline">
-                                            [${index + 1}] ${citation.title || 'Reddit Discussion'}
-                                        </a>
-                                    `).join('')}
-                                </div>
-                            </details>
-                        ` : ''}
                     </div>
                 </div>
             `;
 
-            return competitorDiv;
+            return competitorLink;
         }
 
         // Toggle details function
@@ -641,15 +810,23 @@
 
             if (collapsible.classList.contains('expanded')) {
                 collapsible.classList.remove('expanded');
-                button.textContent = 'Show Details';
+                button.textContent = 'Details';
             } else {
                 collapsible.classList.add('expanded');
-                button.textContent = 'Hide Details';
+                button.textContent = 'Hide';
             }
         }
 
         // Make toggleDetails globally available
         window.toggleDetails = toggleDetails;
+
+        // Show old analysis banner if needed
+        if (data.isOld && analysis.status === 'done' && !analysis.error) {
+            const banner = document.getElementById('old-analysis-banner');
+            const refreshLink = document.getElementById('refresh-link');
+            refreshLink.href = `/new?company=${encodeURIComponent(analysis.company_domain)}`;
+            banner.classList.remove('hidden');
+        }
 
         // Show appropriate state
         if (analysis.status === 'pending') {
@@ -687,24 +864,56 @@
             document.getElementById('results-state').classList.remove('hidden');
             const result = analysis.result.output.content;
 
-            // Populate basic company info
+            // Populate company favicon and logo
             const companyInitial = result.company_name ? result.company_name.charAt(0).toUpperCase() : '?';
-            document.getElementById('company-logo').textContent = companyInitial;
+            const faviconImg = document.getElementById('company-favicon');
+            const logoDiv = document.getElementById('company-logo');
+
+            faviconImg.src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(analysis.company_domain)}&sz=256`;
+            faviconImg.alt = `${result.company_name || 'Company'} logo`;
+            faviconImg.onload = function () {
+                this.classList.remove('hidden');
+                logoDiv.style.display = 'none';
+            };
+            faviconImg.onerror = function () {
+                this.classList.add('hidden');
+                logoDiv.style.display = 'flex';
+            };
+
+            logoDiv.textContent = companyInitial;
+
+            // Populate basic company info
             document.getElementById('company-name').textContent = result.company_name || 'Unknown Company';
             document.getElementById('company-domain').textContent = result.company_domain || '';
             document.getElementById('company-location').textContent = result.headquarters_location || '';
+
+            // LinkedIn link
+            const linkedinLink = document.getElementById('linkedin-link');
+            if (result.linkedin_url && result.linkedin_url !== 'Not found') {
+                linkedinLink.href = result.linkedin_url;
+                linkedinLink.classList.remove('hidden');
+            }
 
             // Populate stats
             document.getElementById('founded-year').textContent = result.founded_year || 'Unknown';
             document.getElementById('employee-count').textContent = result.employee_count || 'Unknown';
             document.getElementById('industry-sector').textContent = result.industry_sector || 'Unknown';
             document.getElementById('total-funding').textContent = result.total_funding_raised || 'Not disclosed';
+            document.getElementById('latest-funding').textContent = result.latest_funding_round || 'Not disclosed';
+            document.getElementById('current-valuation').textContent = result.current_valuation || 'Not disclosed';
 
-            // Populate business description with analysis features
+            // Populate business description
             document.getElementById('business-description-card').innerHTML = createAnalysisCard(
                 result.business_description || 'No description available',
                 'business_description',
                 'Business Description'
+            );
+
+            // Populate unique value proposition
+            document.getElementById('unique-value-proposition-card').innerHTML = createAnalysisCard(
+                result.unique_value_proposition || 'No unique value proposition analysis available',
+                'unique_value_proposition',
+                'Unique Value Proposition'
             );
 
             // Populate target market analysis
@@ -721,11 +930,36 @@
                 'Market Size & Growth'
             );
 
+            // Populate recent news
+            document.getElementById('recent-news-card').innerHTML = createAnalysisCard(
+                result.recent_news_developments || 'No recent news available',
+                'recent_news_developments',
+                'Recent News & Developments'
+            );
+
+            // Populate market opportunities
+            document.getElementById('market-opportunities-card').innerHTML = createAnalysisCard(
+                result.market_opportunities || 'No market opportunities analysis available',
+                'market_opportunities',
+                'Market Opportunities'
+            );
+
+            // Populate competitive landscape overview
+            document.getElementById('competitive-landscape-card').innerHTML = createAnalysisCard(
+                result.competitive_landscape_overview || 'No competitive landscape overview available',
+                'competitive_landscape_overview',
+                'Competitive Landscape Overview'
+            );
+
             // Populate Reddit analysis
+            const sentimentText = result.reddit_overall_sentiment ?
+                `Reddit Sentiment: ${result.reddit_overall_sentiment.charAt(0).toUpperCase() + result.reddit_overall_sentiment.slice(1)}` :
+                'Community Analysis';
+
             document.getElementById('reddit-analysis-card').innerHTML = createAnalysisCard(
                 result.target_company_reddit_analysis || 'No Reddit analysis available',
                 'target_company_reddit_analysis',
-                `Reddit Analysis - ${result.reddit_overall_sentiment ? result.reddit_overall_sentiment.toUpperCase() + ' sentiment' : 'Unknown sentiment'}`
+                sentimentText
             );
 
             // Populate executive summary
@@ -738,19 +972,12 @@
             // Populate competitors
             const competitorsContainer = document.getElementById('competitors-container');
             if (result.competitors && result.competitors.length > 0) {
-                result.competitors.forEach((competitor, index) => {
-                    // Try to find basis for this specific competitor
-                    const competitorBasis = analysis.result.output.basis ?
-                        analysis.result.output.basis.filter(b =>
-                            b.field.includes(`competitors.${index}`) ||
-                            b.field.includes(`competitors[${index}]`)
-                        ) : null;
-
-                    const competitorElement = createCompetitorCard(competitor, competitorBasis);
+                result.competitors.forEach((competitor) => {
+                    const competitorElement = createCompetitorCard(competitor);
                     competitorsContainer.appendChild(competitorElement);
                 });
             } else {
-                competitorsContainer.innerHTML = '<div class="text-center text-gray-500 py-8">No competitors data available</div>';
+                competitorsContainer.innerHTML = '<div class="analysis-card text-center text-gray-500 py-12"><p class="text-sm uppercase tracking-wide">No competitors data available</p></div>';
             }
         }
     </script>

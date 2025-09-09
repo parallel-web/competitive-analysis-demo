@@ -10,7 +10,7 @@
   "dependencies": {
     "parallel-web": "^0.1.0",
     "queryable-object": "^0.0.8",
-    "simplerauth-client": "latest"
+    "simplerauth-client": "^0.0.14"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241106.0",
