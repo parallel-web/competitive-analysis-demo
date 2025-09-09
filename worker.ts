@@ -152,6 +152,9 @@ export default {
           case "/":
             return handleHome(do_stub);
 
+          case "/tools/list":
+            return new Response(JSON.stringify({}));
+
           case "/new":
             return handleNew(request, do_stub, ctx, env);
 
@@ -162,6 +165,10 @@ export default {
             if (pathname.startsWith("/analysis/")) {
               const hostname = pathname.replace("/analysis/", "");
               return handleResult(url, hostname, do_stub);
+            }
+            if (pathname.startsWith("/md/")) {
+              const hostname = pathname.replace("/md/", "");
+              return handleMd(hostname, do_stub);
             }
             if (pathname.startsWith("/og/")) {
               const hostname = pathname.replace("/og/", "");
@@ -520,6 +527,285 @@ function escapeXml(text: string): string {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
+
+async function handleMd(
+  hostname: string,
+  do_stub: DurableObjectStub<CompetitorAnalysisDO>
+): Promise<Response> {
+  const analysis = await do_stub.getAnalysis(hostname);
+
+  if (
+    !analysis ||
+    analysis.status !== "done" ||
+    analysis.error ||
+    !analysis.result
+  ) {
+    return new Response("Analysis not found or incomplete", { status: 404 });
+  }
+
+  const result = JSON.parse(analysis.result);
+  const analysisData = result.output?.content || {};
+
+  // Get competitor hostnames from the analysis
+  const competitors = analysisData.competitors || [];
+  const competitorHostnames = competitors
+    .map((comp: { website: string }) => {
+      if (!comp.website) return null;
+      // Extract hostname from URL
+      try {
+        const url = comp.website.startsWith("http")
+          ? comp.website
+          : `https://${comp.website}`;
+        return new URL(url).hostname;
+      } catch {
+        // If URL parsing fails, try to clean it up
+        return comp.website
+          .replace(/^https?:\/\//, "")
+          .replace(/\/$/, "")
+          .split("/")[0];
+      }
+    })
+    .filter(Boolean);
+
+  // Fetch competitor analyses
+  const competitorAnalyses = await Promise.all(
+    competitorHostnames.map(async (compHostname: string) => {
+      const compAnalysis = await do_stub.getAnalysis(compHostname);
+      if (
+        compAnalysis &&
+        compAnalysis.status === "done" &&
+        !compAnalysis.error &&
+        compAnalysis.result
+      ) {
+        const compResult = JSON.parse(compAnalysis.result);
+        return {
+          hostname: compHostname,
+          data: compResult.output?.content || {},
+        };
+      }
+      return null;
+    })
+  );
+
+  const validCompetitorAnalyses = competitorAnalyses.filter(Boolean);
+
+  // Build markdown report
+  const markdown = buildCompetitiveLandscapeMarkdown(
+    { hostname, data: analysisData },
+    validCompetitorAnalyses
+  );
+
+  return new Response(markdown, {
+    headers: {
+      "Content-Type": "text/markdown;charset=utf8",
+      "Cache-Control": "public, max-age=3600",
+    },
+  });
+}
+
+function buildCompetitiveLandscapeMarkdown(
+  primaryCompany: { hostname: string; data: any },
+  competitors: Array<{ hostname: string; data: any }>
+): string {
+  const allCompanies = [primaryCompany, ...competitors];
+
+  let markdown = `# Competitive Landscape Analysis\n\n`;
+  markdown += `Primary company: **${
+    primaryCompany.data.company_name || primaryCompany.hostname
+  }**\n\n`;
+
+  if (competitors.length > 0) {
+    markdown += `Competitors analyzed: ${competitors
+      .map((c) => c.data.company_name || c.hostname)
+      .join(", ")}\n\n`;
+  } else {
+    markdown += `*Note: No competitor analyses available for comparison.*\n\n`;
+  }
+
+  markdown += `---\n\n`;
+
+  // Company Overview Section
+  markdown += `## Company Overview\n\n`;
+  allCompanies.forEach((company, index) => {
+    const isPrimary = index === 0;
+    const companyName = company.data.company_name || company.hostname;
+
+    markdown += `### ${isPrimary ? "🎯 " : ""}${companyName}${
+      isPrimary ? " (Primary)" : ""
+    }\n\n`;
+
+    if (company.data.business_description) {
+      markdown += `${company.data.business_description}\n\n`;
+    }
+
+    if (company.data.unique_value_proposition) {
+      markdown += `**Unique Value Proposition:** ${company.data.unique_value_proposition}\n\n`;
+    }
+  });
+
+  // Key Metrics Comparison
+  markdown += `## Key Metrics Comparison\n\n`;
+  markdown += `| Company | Industry | Founded | Employees | Funding | Valuation |\n`;
+  markdown += `|---------|----------|---------|-----------|---------|----------|\n`;
+
+  allCompanies.forEach((company, index) => {
+    const isPrimary = index === 0;
+    const companyName = company.data.company_name || company.hostname;
+    const prefix = isPrimary ? "🎯 " : "";
+
+    markdown += `| ${prefix}${companyName} | ${
+      company.data.industry_sector || "N/A"
+    } | ${company.data.founded_year || "N/A"} | ${
+      company.data.employee_count || "N/A"
+    } | ${company.data.total_funding_raised || "N/A"} | ${
+      company.data.current_valuation || "N/A"
+    } |\n`;
+  });
+
+  markdown += `\n`;
+
+  // Market Analysis
+  markdown += `## Market Analysis\n\n`;
+
+  if (primaryCompany.data.market_size_and_growth) {
+    markdown += `### Market Size & Growth\n`;
+    markdown += `${primaryCompany.data.market_size_and_growth}\n\n`;
+  }
+
+  if (primaryCompany.data.competitive_landscape_overview) {
+    markdown += `### Competitive Landscape\n`;
+    markdown += `${primaryCompany.data.competitive_landscape_overview}\n\n`;
+  }
+
+  // Target Market Analysis
+  markdown += `## Target Market Analysis\n\n`;
+  allCompanies.forEach((company, index) => {
+    const isPrimary = index === 0;
+    const companyName = company.data.company_name || company.hostname;
+
+    if (company.data.target_market_analysis) {
+      markdown += `### ${isPrimary ? "🎯 " : ""}${companyName}\n`;
+      markdown += `${company.data.target_market_analysis}\n\n`;
+    }
+  });
+
+  // Recent Developments
+  markdown += `## Recent Developments\n\n`;
+  allCompanies.forEach((company, index) => {
+    const isPrimary = index === 0;
+    const companyName = company.data.company_name || company.hostname;
+
+    if (company.data.recent_news_developments) {
+      markdown += `### ${isPrimary ? "🎯 " : ""}${companyName}\n`;
+      markdown += `${company.data.recent_news_developments}\n\n`;
+    }
+  });
+
+  // Reddit Sentiment Analysis (only for companies that have it)
+  const companiesWithRedditData = allCompanies.filter(
+    (c) => c.data.target_company_reddit_analysis
+  );
+  if (companiesWithRedditData.length > 0) {
+    markdown += `## Reddit Community Insights\n\n`;
+
+    companiesWithRedditData.forEach((company, index) => {
+      const isPrimaryInList = company.hostname === primaryCompany.hostname;
+      const companyName = company.data.company_name || company.hostname;
+      const sentiment = company.data.reddit_overall_sentiment || "Unknown";
+      const sentimentEmoji =
+        sentiment === "high"
+          ? "😊"
+          : sentiment === "medium"
+          ? "😐"
+          : sentiment === "low"
+          ? "😞"
+          : "❓";
+
+      markdown += `### ${
+        isPrimaryInList ? "🎯 " : ""
+      }${companyName} ${sentimentEmoji} (${sentiment} sentiment)\n`;
+      markdown += `${company.data.target_company_reddit_analysis}\n\n`;
+    });
+  }
+
+  // Market Opportunities
+  const companiesWithOpportunities = allCompanies.filter(
+    (c) => c.data.market_opportunities
+  );
+  if (companiesWithOpportunities.length > 0) {
+    markdown += `## Market Opportunities\n\n`;
+
+    companiesWithOpportunities.forEach((company) => {
+      const isPrimaryInList = company.hostname === primaryCompany.hostname;
+      const companyName = company.data.company_name || company.hostname;
+
+      markdown += `### ${isPrimaryInList ? "🎯 " : ""}${companyName}\n`;
+      markdown += `${company.data.market_opportunities}\n\n`;
+    });
+  }
+
+  // Executive Summary
+  markdown += `## Executive Summary\n\n`;
+
+  if (primaryCompany.data.executive_summary) {
+    markdown += `### Primary Company Analysis\n`;
+    markdown += `${primaryCompany.data.executive_summary}\n\n`;
+  }
+
+  if (competitors.length > 0) {
+    markdown += `### Competitive Positioning\n`;
+    markdown += `Based on the analysis of ${competitors.length} competitor${
+      competitors.length === 1 ? "" : "s"
+    }, `;
+    markdown += `${
+      primaryCompany.data.company_name || primaryCompany.hostname
+    } operates in a `;
+
+    const totalCompetitors = primaryCompany.data.competitors?.length || 0;
+    if (totalCompetitors > 3) {
+      markdown += `highly competitive market with ${totalCompetitors} identified competitors. `;
+    } else if (totalCompetitors > 1) {
+      markdown += `moderately competitive market with ${totalCompetitors} main competitors. `;
+    } else {
+      markdown += `nascent market with limited direct competition. `;
+    }
+
+    markdown += `Key differentiators and strategic positioning should focus on the unique value propositions identified above.\n\n`;
+  }
+
+  // Company Details Table
+  markdown += `## Detailed Company Information\n\n`;
+
+  const fields = [
+    { key: "company_domain", label: "Domain" },
+    { key: "headquarters_location", label: "Headquarters" },
+    { key: "linkedin_url", label: "LinkedIn" },
+    { key: "latest_funding_round", label: "Latest Funding" },
+  ];
+
+  fields.forEach((field) => {
+    const companiesWithField = allCompanies.filter((c) => c.data[field.key]);
+    if (companiesWithField.length > 0) {
+      markdown += `### ${field.label}\n\n`;
+      companiesWithField.forEach((company) => {
+        const isPrimaryInList = company.hostname === primaryCompany.hostname;
+        const companyName = company.data.company_name || company.hostname;
+        markdown += `- ${isPrimaryInList ? "🎯 " : ""}**${companyName}:** ${
+          company.data[field.key]
+        }\n`;
+      });
+      markdown += `\n`;
+    }
+  });
+
+  // Footer
+  markdown += `---\n\n`;
+  markdown += `*Analysis generated on ${new Date().toLocaleDateString()} for competitive intelligence purposes.*\n`;
+  markdown += `*Primary company data may be more comprehensive than competitor data depending on analysis availability.*\n`;
+
+  return markdown;
+}
+
 async function handleNew(
   request: Request,
   do_stub: DurableObjectStub<CompetitorAnalysisDO>,
@@ -668,8 +954,6 @@ async function handleNew(
     );
   }
 
-  const companyName = getCompanyName(hostname);
-
   // Check user limits
   const userAnalyses = await do_stub.getUserAnalysisCount(ctx.user?.username);
   if (userAnalyses >= 5 && ctx.user.username !== ADMIN_USERNAME) {
@@ -680,195 +964,14 @@ async function handleNew(
   }
 
   // Create analysis task
-  const parallel = new Parallel({ apiKey: env.PARALLEL_API_KEY });
 
   try {
-    const taskRun = await parallel.beta.taskRun.create(
-      {
-        input: `Conduct comprehensive competitive intelligence analysis for company: ${hostname} including a Reddit sentiment analysis`,
-        processor: "pro",
-        metadata: { hostname },
-        mcp_servers: [
-          {
-            name: "Reddit",
-            url: env.MCP_URL,
-            type: "url",
-          },
-        ],
-        webhook: {
-          url: `${url.protocol}//${url.host}/webhook`,
-          event_types: ["task_run.status"],
-        },
-        task_spec: {
-          output_schema: {
-            type: "json",
-            json_schema: {
-              type: "object",
-              description:
-                "Extract comprehensive competitive intelligence using deep web research across news, financial databases, social media, forums, and industry reports. Prioritize recent data and authoritative sources.",
-              required: [
-                "company_name",
-                "company_domain",
-                "headquarters_location",
-                "industry_sector",
-                "employee_count",
-                "business_description",
-                "unique_value_proposition",
-                "target_market_analysis",
-                "recent_news_developments",
-                "market_size_and_growth",
-                "competitive_landscape_overview",
-                "competitors",
-                "target_company_reddit_analysis",
-                "executive_summary",
-              ],
-              additionalProperties: false,
-              properties: {
-                company_name: {
-                  type: "string",
-                  description: "Full legal name of the company",
-                },
-                company_domain: {
-                  type: "string",
-                  description: "Primary website domain",
-                },
-                headquarters_location: {
-                  type: "string",
-                  description:
-                    "City, State/Province, Country where company headquarters is located",
-                },
-                industry_sector: {
-                  type: "string",
-                  description:
-                    "Primary industry sector and specific vertical with market context. 2-5 words.",
-                },
-                employee_count: {
-                  type: "string",
-                  description:
-                    "Current number of employees as specific number or range with source date",
-                },
-                linkedin_url: {
-                  type: "string",
-                  description:
-                    "Official LinkedIn company page URL, or 'Not found' if unavailable",
-                },
-                founded_year: {
-                  type: "string",
-                  description: "Year the company was founded",
-                },
-                total_funding_raised: {
-                  type: "string",
-                  description:
-                    "Total amount of funding raised with currency, or 'Not disclosed' if unknown",
-                },
-                latest_funding_round: {
-                  type: "string",
-                  description:
-                    "Most recent funding round with amount, type, date, and lead investor if available",
-                },
-                current_valuation: {
-                  type: "string",
-                  description:
-                    "Most recent company valuation if available, or 'Not publicly disclosed'",
-                },
-                business_description: {
-                  type: "string",
-                  description:
-                    "Comprehensive 2-3 paragraph description of the company's core business, products, services, target customers, and revenue model. Include specific product names and key differentiators.",
-                },
-                unique_value_proposition: {
-                  type: "string",
-                  description:
-                    "Clear statement of what makes this company unique in the market",
-                },
-                target_market_analysis: {
-                  type: "string",
-                  description:
-                    "1-2 paragraph analysis of the company's target market segments, customer demographics, geographic focus, and market positioning strategy.",
-                },
-                recent_news_developments: {
-                  type: "string",
-                  description:
-                    "Summary of significant company developments, product launches, partnerships, leadership changes, or strategic moves from the last 6-12 months with specific dates and details.",
-                },
-                market_size_and_growth: {
-                  type: "string",
-                  description:
-                    "Detailed analysis of the total addressable market size, growth rates, key market drivers, and future projections for the industry the company operates in.",
-                },
-
-                competitors: {
-                  type: "array",
-                  description: "3-6 key direct competitors.",
-                  items: {
-                    type: "object",
-                    required: ["name", "website"],
-                    additionalProperties: false,
-                    properties: {
-                      name: {
-                        type: "string",
-                        description: "Competitor company name",
-                      },
-                      website: {
-                        type: "string",
-                        description:
-                          "Competitor website URL. Leave empty if not found",
-                      },
-                    },
-                  },
-                },
-
-                competitive_landscape_overview: {
-                  type: "string",
-                  description:
-                    "Short summary (1 paragraph) of the competitive landscape and market dynamics",
-                },
-
-                target_company_reddit_analysis: {
-                  type: "string",
-                  description:
-                    "Comprehensive paragraph analysis of Reddit discussions specifically about the target company, including common themes, user experiences, comparisons to competitors, and insights from relevant subreddits.",
-                },
-
-                reddit_overall_sentiment: {
-                  type: "string",
-                  description:
-                    "Overall sentiment of the target company on Reddit: 'low', 'medium' or 'high'",
-                },
-                market_opportunities: {
-                  type: "string",
-                  description:
-                    "2-3 sentences analysis of underserved market segments, emerging trends, geographic expansion opportunities, or product/service gaps that represent growth opportunities for the target company.",
-                },
-                executive_summary: {
-                  type: "string",
-                  description:
-                    "Short (1 paragraph) executive summary covering the company's current market position, key competitive dynamics, most significant opportunities and threats, and critical strategic implications. Written for senior leadership decision-making.",
-                },
-              },
-            },
-          },
-        },
-      },
-      {
-        headers: {
-          "parallel-beta": "mcp-server-2025-07-17,webhook-2025-08-12",
-        },
-      }
-    );
-
-    await do_stub.createAnalysis({
+    await performAnalysis(env, do_stub, {
       hostname,
-      company_domain: hostname,
-      company_name: companyName,
-      status: "pending",
-      username: ctx.user.username,
-      profile_image_url: ctx.user.profile_image_url || "",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      visits: 0,
-      result: null,
-      error: null,
+      isDeep: true,
+      url,
+      username: ctx.user?.username,
+      profile_image_url: ctx.user?.profile_image_url,
     });
 
     return new Response(null, {
@@ -881,11 +984,211 @@ async function handleNew(
   }
 }
 
+const performAnalysis = async (
+  env: Env,
+  do_stub: DurableObjectStub<CompetitorAnalysisDO>,
+  context: {
+    hostname: string;
+    isDeep: boolean;
+    url: URL;
+    username: string;
+    profile_image_url: string;
+  }
+) => {
+  const { hostname, isDeep, url, username, profile_image_url } = context;
+  const parallel = new Parallel({ apiKey: env.PARALLEL_API_KEY });
+
+  const companyName = getCompanyName(hostname);
+
+  const taskRun = await parallel.beta.taskRun.create(
+    {
+      input: `Conduct comprehensive competitive intelligence analysis for company: ${hostname} including a Reddit sentiment analysis`,
+      processor: "pro",
+      metadata: { hostname, isDeep, username, profile_image_url },
+      mcp_servers: [{ name: "Reddit", url: env.MCP_URL, type: "url" }],
+      webhook: {
+        url: `${url.protocol}//${url.host}/webhook`,
+        event_types: ["task_run.status"],
+      },
+      task_spec: {
+        output_schema: {
+          type: "json",
+          json_schema: {
+            type: "object",
+            description:
+              "Extract comprehensive competitive intelligence using deep web research across news, financial databases, social media, forums, and industry reports. Prioritize recent data and authoritative sources.",
+            required: [
+              "company_name",
+              "company_domain",
+              "headquarters_location",
+              "industry_sector",
+              "employee_count",
+              "business_description",
+              "unique_value_proposition",
+              "target_market_analysis",
+              "recent_news_developments",
+              "market_size_and_growth",
+              "competitive_landscape_overview",
+              "competitors",
+              "target_company_reddit_analysis",
+              "executive_summary",
+            ],
+            additionalProperties: false,
+            properties: {
+              company_name: {
+                type: "string",
+                description: "Full legal name of the company",
+              },
+              company_domain: {
+                type: "string",
+                description: "Primary website domain",
+              },
+              headquarters_location: {
+                type: "string",
+                description:
+                  "City, State/Province, Country where company headquarters is located",
+              },
+              industry_sector: {
+                type: "string",
+                description:
+                  "Primary industry sector and specific vertical with market context. 2-5 words.",
+              },
+              employee_count: {
+                type: "string",
+                description:
+                  "Current number of employees as specific number or range with source date",
+              },
+              linkedin_url: {
+                type: "string",
+                description:
+                  "Official LinkedIn company page URL, or 'Not found' if unavailable",
+              },
+              founded_year: {
+                type: "string",
+                description: "Year the company was founded",
+              },
+              total_funding_raised: {
+                type: "string",
+                description:
+                  "Total amount of funding raised with currency, or 'Not disclosed' if unknown",
+              },
+              latest_funding_round: {
+                type: "string",
+                description:
+                  "Most recent funding round with amount, type, date, and lead investor if available",
+              },
+              current_valuation: {
+                type: "string",
+                description:
+                  "Most recent company valuation if available, or 'Not publicly disclosed'",
+              },
+              business_description: {
+                type: "string",
+                description:
+                  "Comprehensive 2-3 paragraph description of the company's core business, products, services, target customers, and revenue model. Include specific product names and key differentiators.",
+              },
+              unique_value_proposition: {
+                type: "string",
+                description:
+                  "Clear statement of what makes this company unique in the market",
+              },
+              target_market_analysis: {
+                type: "string",
+                description:
+                  "1-2 paragraph analysis of the company's target market segments, customer demographics, geographic focus, and market positioning strategy.",
+              },
+              recent_news_developments: {
+                type: "string",
+                description:
+                  "Summary of significant company developments, product launches, partnerships, leadership changes, or strategic moves from the last 6-12 months with specific dates and details.",
+              },
+              market_size_and_growth: {
+                type: "string",
+                description:
+                  "Detailed analysis of the total addressable market size, growth rates, key market drivers, and future projections for the industry the company operates in.",
+              },
+
+              competitors: {
+                type: "array",
+                description: "3-6 key direct competitors.",
+                items: {
+                  type: "object",
+                  required: ["name", "website"],
+                  additionalProperties: false,
+                  properties: {
+                    name: {
+                      type: "string",
+                      description: "Competitor company name",
+                    },
+                    website: {
+                      type: "string",
+                      description:
+                        "Competitor website URL. Leave empty if not found",
+                    },
+                  },
+                },
+              },
+
+              competitive_landscape_overview: {
+                type: "string",
+                description:
+                  "Short summary (1 paragraph) of the competitive landscape and market dynamics",
+              },
+
+              target_company_reddit_analysis: {
+                type: "string",
+                description:
+                  "Comprehensive paragraph analysis of Reddit discussions specifically about the target company, including common themes, user experiences, comparisons to competitors, and insights from relevant subreddits.",
+              },
+
+              reddit_overall_sentiment: {
+                type: "string",
+                description:
+                  "Overall sentiment of the target company on Reddit: 'low', 'medium' or 'high'",
+              },
+              market_opportunities: {
+                type: "string",
+                description:
+                  "2-3 sentences analysis of underserved market segments, emerging trends, geographic expansion opportunities, or product/service gaps that represent growth opportunities for the target company.",
+              },
+              executive_summary: {
+                type: "string",
+                description:
+                  "Short (1 paragraph) executive summary covering the company's current market position, key competitive dynamics, most significant opportunities and threats, and critical strategic implications. Written for senior leadership decision-making.",
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      headers: {
+        "parallel-beta": "mcp-server-2025-07-17,webhook-2025-08-12",
+      },
+    }
+  );
+
+  await do_stub.createAnalysis({
+    hostname,
+    company_domain: hostname,
+    company_name: companyName,
+    status: "pending",
+    username: username || "",
+    profile_image_url: profile_image_url || "",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    visits: 0,
+    result: null,
+    error: null,
+  });
+};
+
 async function handleWebhook(
   request: Request,
   do_stub: DurableObjectStub<CompetitorAnalysisDO>,
   env: Env
 ): Promise<Response> {
+  const url = new URL(request.url);
   if (request.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
   }
@@ -955,6 +1258,56 @@ async function handleWebhook(
           "Could not complete task - No competitors found. Please try again."
         );
       } else {
+        // it's good.
+
+        if (result.run.metadata?.isDeep) {
+          // perform deeper analysis too
+          const hostnames = (
+            result.output.content?.competitors as any[] | undefined
+          )
+            ?.map((x) => x.website)
+            .map((website: string | undefined) => {
+              try {
+                return new URL(website).hostname;
+              } catch (e) {
+                return;
+              }
+            })
+            .filter((x) => !!x)
+            .map((x) => x as string);
+
+          if (hostnames?.length) {
+            const username = result.run.metadata.username as string | undefined;
+            const profile_image_url = result.run.metadata.profile_image_url as
+              | string
+              | undefined;
+
+            await Promise.all(
+              hostnames.map(async (hostname) => {
+                // first check.
+                const existingAnalysis = await do_stub.getAnalysis(hostname);
+
+                if (
+                  existingAnalysis &&
+                  !existingAnalysis.error &&
+                  !isAnalysisOld(existingAnalysis.updated_at)
+                ) {
+                  // not needed if already have without error and not old
+                  return;
+                }
+
+                await performAnalysis(env, do_stub, {
+                  isDeep: false,
+                  hostname,
+                  url,
+                  username,
+                  profile_image_url,
+                });
+              })
+            );
+          }
+        }
+
         await do_stub.updateAnalysisResult(
           hostname,
           JSON.stringify(result),

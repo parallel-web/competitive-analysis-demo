@@ -389,6 +389,49 @@
             opacity: 0.9;
         }
 
+        .secondary-btn {
+            background: white;
+            color: var(--index-black);
+            border: 2px solid var(--neural);
+            padding: 16px 32px;
+            font-weight: 500;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .secondary-btn:hover {
+            border-color: var(--signal);
+            color: var(--signal);
+        }
+
+        .agent-section {
+            text-align: center;
+            margin-top: 60px;
+            padding: 48px 0;
+            border-top: 2px solid #e8e6e1;
+        }
+
+        .agent-card {
+            background: #f8f8f6;
+            border: 2px solid var(--neural);
+            border-radius: 6px;
+            padding: 32px;
+            max-width: 600px;
+            margin: 24px auto 0;
+        }
+
+        .icon-terminal {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+        }
+
         @media (max-width: 768px) {
             .content-wrapper {
                 padding: 0 16px;
@@ -425,6 +468,17 @@
 
             body {
                 font-size: 13px;
+            }
+
+            .agent-card {
+                padding: 24px;
+                margin-top: 20px;
+            }
+
+            .cta-btn,
+            .secondary-btn {
+                padding: 14px 24px;
+                font-size: 12px;
             }
         }
 
@@ -658,6 +712,24 @@
                     </div>
                 </section>
 
+                <!-- Agent-Friendly Section -->
+                <div class="agent-section">
+                    <h3 class="gerstner text-xl font-medium mb-4">Agent-Friendly Competitor Analysis</h3>
+                    <div class="agent-card">
+                        <p class="text-gray-600 mb-6 text-sm leading-relaxed">
+                            Perfect for AI agents and automated analysis. Get the complete competitor analysis
+                            in structured markdown format with full context for all analyzed competitors.
+                        </p>
+                        <a href="#" id="markdown-link" class="secondary-btn" target="_blank">
+                            <svg class="icon-terminal" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 4l3 3-3 3 1.5 1.5L9 12l-4.5-4.5L6 9zm6 6h6v2h-6v-2z" />
+                            </svg>
+                            View Markdown Analysis
+                        </a>
+                    </div>
+                </div>
+
                 <!-- CTA Section -->
                 <div class="cta-section">
                     <h3 class="gerstner text-xl font-medium mb-8">Ready to analyze another company?</h3>
@@ -863,6 +935,10 @@
         } else if (analysis.result && analysis.result.output) {
             document.getElementById('results-state').classList.remove('hidden');
             const result = analysis.result.output.content;
+
+            // Set up markdown link
+            const markdownLink = document.getElementById('markdown-link');
+            markdownLink.href = `/md/${analysis.company_domain}`;
 
             // Populate company favicon and logo
             const companyInitial = result.company_name ? result.company_name.charAt(0).toUpperCase() : '?';
