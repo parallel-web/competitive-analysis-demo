@@ -5,6 +5,9 @@ import {
   QueryableHandler,
   studioMiddleware,
 } from "queryable-object";
+import { withMcp } from "with-mcp";
+//@ts-ignore
+import openapi from "./public/openapi.json";
 import { DurableObject } from "cloudflare:workers";
 import { UserContext, withSimplerAuth } from "simplerauth-client";
 import { Parallel } from "parallel-web";
@@ -39,9 +42,23 @@ interface AnalysisRow {
 }
 
 function getCompanyName(domain: string): string {
-  // Extract company name from domain
-  const parts = domain.split(".");
-  return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+  // Remove protocol if present
+  let cleanDomain = domain.replace(/^https?:\/\//, "");
+
+  // Remove www. if present
+  cleanDomain = cleanDomain.replace(/^www\./, "");
+
+  // Remove TLD (everything after the last dot)
+  const lastDotIndex = cleanDomain.lastIndexOf(".");
+  if (lastDotIndex > 0) {
+    cleanDomain = cleanDomain.substring(0, lastDotIndex);
+  }
+
+  // Replace dots with spaces and capitalize first letter of each word
+  return cleanDomain
+    .split(".")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 function isValidDomain(domain: string): boolean {
@@ -131,7 +148,7 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    return withSimplerAuth<Env>(
+    const handler = withSimplerAuth<Env>(
       async (request, env, ctx) => {
         const url = new URL(request.url);
         const pathname = url.pathname;
@@ -151,9 +168,6 @@ export default {
 
           case "/":
             return handleHome(do_stub);
-
-          case "/tools/list":
-            return new Response(JSON.stringify({}));
 
           case "/new":
             return handleNew(request, do_stub, ctx, env);
@@ -178,7 +192,12 @@ export default {
         }
       },
       { isLoginRequired: false }
-    )(request, env, ctx);
+    );
+
+    return withMcp(handler, openapi, {
+      serverInfo: { name: "Competitive Analysis MCP", version: "1.0.0" },
+      toolOperationIds: ["getAnalysisMarkdown"],
+    })(request, env, ctx);
   },
 } satisfies ExportedHandler<Env>;
 
@@ -999,11 +1018,10 @@ const performAnalysis = async (
   const parallel = new Parallel({ apiKey: env.PARALLEL_API_KEY });
 
   const companyName = getCompanyName(hostname);
-
   const taskRun = await parallel.beta.taskRun.create(
     {
       input: `Conduct comprehensive competitive intelligence analysis for company: ${hostname} including a Reddit sentiment analysis`,
-      processor: "pro",
+      processor: "ultra2x",
       metadata: { hostname, isDeep, username, profile_image_url },
       mcp_servers: [{ name: "Reddit", url: env.MCP_URL, type: "url" }],
       webhook: {
@@ -1110,7 +1128,8 @@ const performAnalysis = async (
 
               competitors: {
                 type: "array",
-                description: "3-6 key direct competitors.",
+                description:
+                  "3-6 key direct competitors. Only list competitors with website",
                 items: {
                   type: "object",
                   required: ["name", "website"],
@@ -1123,7 +1142,7 @@ const performAnalysis = async (
                     website: {
                       type: "string",
                       description:
-                        "Competitor website URL. Leave empty if not found",
+                        "Competitor website URL (format: https://hostname.com, no www, no pathname).",
                     },
                   },
                 },
@@ -1228,7 +1247,9 @@ async function handleWebhook(
 
     try {
       const parallel = new Parallel({ apiKey: env.PARALLEL_API_KEY });
-      const result = await parallel.beta.taskRun.result(payload.data.run_id);
+      const result = await parallel.beta.taskRun.result(payload.data.run_id, {
+        betas: ["mcp-server-2025-07-17"],
+      });
 
       const hasEmptyString = result.output.content
         ? !!Object.values(result.output.content).find((x) => x === "")
@@ -1262,19 +1283,27 @@ async function handleWebhook(
 
         if (result.run.metadata?.isDeep) {
           // perform deeper analysis too
+
           const hostnames = (
             result.output.content?.competitors as any[] | undefined
           )
-            ?.map((x) => x.website)
-            .map((website: string | undefined) => {
+            ?.map((comp: { website: string }) => {
+              if (!comp.website) return null;
+              // Extract hostname from URL
               try {
-                return new URL(website).hostname;
-              } catch (e) {
-                return;
+                const url = comp.website.startsWith("http")
+                  ? comp.website
+                  : `https://${comp.website}`;
+                return new URL(url).hostname;
+              } catch {
+                // If URL parsing fails, try to clean it up
+                return comp.website
+                  .replace(/^https?:\/\//, "")
+                  .replace(/\/$/, "")
+                  .split("/")[0];
               }
             })
-            .filter((x) => !!x)
-            .map((x) => x as string);
+            .filter(Boolean);
 
           if (hostnames?.length) {
             const username = result.run.metadata.username as string | undefined;
@@ -1292,9 +1321,12 @@ async function handleWebhook(
                   !existingAnalysis.error &&
                   !isAnalysisOld(existingAnalysis.updated_at)
                 ) {
+                  console.log("not needed", hostname);
                   // not needed if already have without error and not old
                   return;
                 }
+
+                console.log("needed deep", hostname);
 
                 await performAnalysis(env, do_stub, {
                   isDeep: false,

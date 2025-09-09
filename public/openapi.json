@@ -1,0 +1,621 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Competitor Analysis API",
+    "description": "AI-powered competitive intelligence platform that analyzes companies and their competitive landscape using web research and Reddit sentiment analysis.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "url": "https://competitors.p0web.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://competitors.p0web.com",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Get homepage",
+        "description": "Returns the main homepage with popular and recent analyses",
+        "operationId": "getHomepage",
+        "responses": {
+          "200": {
+            "description": "Homepage HTML",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Public"]
+      }
+    },
+    "/new": {
+      "get": {
+        "summary": "Create new analysis",
+        "description": "Initiates a new competitive analysis for a company. Requires authentication and validates the domain before processing.",
+        "operationId": "createAnalysis",
+        "security": [
+          {
+            "oauth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "company",
+            "in": "query",
+            "required": true,
+            "description": "The domain name of the company to analyze (e.g., example.com)",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\\.[a-zA-Z]{2,})+$",
+              "example": "openai.com"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to analysis page",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "URL of the analysis page"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid domain or missing company parameter",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (5 analyses per user)",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Analysis"]
+      }
+    },
+    "/analysis/{hostname}": {
+      "get": {
+        "summary": "Get analysis result",
+        "description": "Returns the competitive analysis results for a specific company",
+        "operationId": "getAnalysis",
+        "parameters": [
+          {
+            "name": "hostname",
+            "in": "path",
+            "required": true,
+            "description": "The hostname/domain of the company",
+            "schema": {
+              "type": "string",
+              "example": "openai.com"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analysis result page",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Analysis not found",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Analysis"]
+      }
+    },
+    "/md/{hostname}": {
+      "get": {
+        "summary": "Get analysis as markdown",
+        "description": "Returns a comprehensive markdown report of the competitive landscape analysis",
+        "operationId": "getAnalysisMarkdown",
+        "parameters": [
+          {
+            "name": "hostname",
+            "in": "path",
+            "required": true,
+            "description": "The hostname/domain of the company",
+            "schema": {
+              "type": "string",
+              "example": "openai.com"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Markdown analysis report",
+            "content": {
+              "text/markdown": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control header"
+              }
+            }
+          },
+          "404": {
+            "description": "Analysis not found or incomplete",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Export"]
+      }
+    },
+    "/og/{hostname}": {
+      "get": {
+        "summary": "Get Open Graph image",
+        "description": "Generates an SVG Open Graph image for social media sharing",
+        "operationId": "getOpenGraphImage",
+        "parameters": [
+          {
+            "name": "hostname",
+            "in": "path",
+            "required": true,
+            "description": "The hostname/domain of the company",
+            "schema": {
+              "type": "string",
+              "example": "openai.com"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SVG Open Graph image",
+            "content": {
+              "image/svg+xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control header"
+              }
+            }
+          }
+        },
+        "tags": ["Social"]
+      }
+    },
+    "/webhook": {
+      "post": {
+        "summary": "Webhook endpoint",
+        "description": "Internal webhook endpoint for receiving analysis completion notifications from the Parallel API",
+        "operationId": "handleWebhook",
+        "security": [
+          {
+            "webhookSignature": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["task_run.status"]
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "run_id": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": ["completed", "failed"]
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "properties": {
+                          "hostname": {
+                            "type": "string"
+                          },
+                          "isDeep": {
+                            "type": "boolean"
+                          },
+                          "username": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "error": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook processed successfully",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "OK"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing required data",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid webhook signature",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Internal"]
+      }
+    },
+    "/admin": {
+      "get": {
+        "summary": "Admin panel",
+        "description": "Administrative interface for managing analyses (admin users only)",
+        "operationId": "getAdminPanel",
+        "security": [
+          {
+            "oauth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin panel interface",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Admin access required",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Admin only"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Admin"]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "oauth": {
+        "type": "oauth2",
+        "description": "OAuth2 authentication via X (Twitter)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://competitors.p0web.com/authorize",
+            "tokenUrl": "https://competitors.p0web.com/token",
+            "scopes": {}
+          }
+        }
+      },
+      "webhookSignature": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "webhook-signature",
+        "description": "HMAC SHA-256 signature for webhook verification"
+      }
+    },
+    "schemas": {
+      "AnalysisResult": {
+        "type": "object",
+        "description": "Comprehensive competitive intelligence analysis result",
+        "properties": {
+          "company_name": {
+            "type": "string",
+            "description": "Full legal name of the company"
+          },
+          "company_domain": {
+            "type": "string",
+            "description": "Primary website domain"
+          },
+          "headquarters_location": {
+            "type": "string",
+            "description": "City, State/Province, Country where company headquarters is located"
+          },
+          "industry_sector": {
+            "type": "string",
+            "description": "Primary industry sector and specific vertical"
+          },
+          "employee_count": {
+            "type": "string",
+            "description": "Current number of employees as specific number or range"
+          },
+          "linkedin_url": {
+            "type": "string",
+            "description": "Official LinkedIn company page URL"
+          },
+          "founded_year": {
+            "type": "string",
+            "description": "Year the company was founded"
+          },
+          "total_funding_raised": {
+            "type": "string",
+            "description": "Total amount of funding raised with currency"
+          },
+          "latest_funding_round": {
+            "type": "string",
+            "description": "Most recent funding round details"
+          },
+          "current_valuation": {
+            "type": "string",
+            "description": "Most recent company valuation"
+          },
+          "business_description": {
+            "type": "string",
+            "description": "Comprehensive description of the company's core business"
+          },
+          "unique_value_proposition": {
+            "type": "string",
+            "description": "What makes this company unique in the market"
+          },
+          "target_market_analysis": {
+            "type": "string",
+            "description": "Analysis of the company's target market segments"
+          },
+          "recent_news_developments": {
+            "type": "string",
+            "description": "Summary of significant company developments from the last 6-12 months"
+          },
+          "market_size_and_growth": {
+            "type": "string",
+            "description": "Analysis of the total addressable market and growth rates"
+          },
+          "competitive_landscape_overview": {
+            "type": "string",
+            "description": "Summary of the competitive landscape and market dynamics"
+          },
+          "competitors": {
+            "type": "array",
+            "description": "List of key direct competitors",
+            "items": {
+              "$ref": "#/components/schemas/Competitor"
+            }
+          },
+          "target_company_reddit_analysis": {
+            "type": "string",
+            "description": "Analysis of Reddit discussions about the target company"
+          },
+          "reddit_overall_sentiment": {
+            "type": "string",
+            "enum": ["low", "medium", "high"],
+            "description": "Overall sentiment of the target company on Reddit"
+          },
+          "market_opportunities": {
+            "type": "string",
+            "description": "Analysis of growth opportunities for the target company"
+          },
+          "executive_summary": {
+            "type": "string",
+            "description": "Executive summary for senior leadership decision-making"
+          }
+        },
+        "required": [
+          "company_name",
+          "company_domain",
+          "headquarters_location",
+          "industry_sector",
+          "employee_count",
+          "business_description",
+          "unique_value_proposition",
+          "target_market_analysis",
+          "recent_news_developments",
+          "market_size_and_growth",
+          "competitive_landscape_overview",
+          "competitors",
+          "target_company_reddit_analysis",
+          "executive_summary"
+        ]
+      },
+      "Competitor": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Competitor company name"
+          },
+          "website": {
+            "type": "string",
+            "description": "Competitor website URL"
+          }
+        },
+        "required": ["name", "website"]
+      },
+      "Analysis": {
+        "type": "object",
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "description": "Company domain hostname"
+          },
+          "company_domain": {
+            "type": "string",
+            "description": "Company domain"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "Company name"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "done"],
+            "description": "Analysis status"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the user who requested the analysis"
+          },
+          "profile_image_url": {
+            "type": "string",
+            "description": "Profile image URL of the user"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the analysis was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the analysis was last updated"
+          },
+          "visits": {
+            "type": "integer",
+            "description": "Number of times this analysis has been viewed"
+          },
+          "result": {
+            "type": "string",
+            "nullable": true,
+            "description": "JSON string containing the analysis result"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true,
+            "description": "Error message if analysis failed"
+          }
+        },
+        "required": [
+          "hostname",
+          "company_domain",
+          "company_name",
+          "status",
+          "username",
+          "profile_image_url",
+          "created_at",
+          "updated_at",
+          "visits"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Public",
+      "description": "Public endpoints accessible without authentication"
+    },
+    {
+      "name": "Analysis",
+      "description": "Core analysis functionality"
+    },
+    {
+      "name": "Export",
+      "description": "Export analysis data in different formats"
+    },
+    {
+      "name": "Social",
+      "description": "Social media integration endpoints"
+    },
+    {
+      "name": "Internal",
+      "description": "Internal system endpoints"
+    },
+    {
+      "name": "Admin",
+      "description": "Administrative endpoints"
+    }
+  ]
+}

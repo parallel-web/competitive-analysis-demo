@@ -69,6 +69,30 @@ Verdict now:
 - Changing to X MCP is tricky due to even stricter data laws and we gotta pay for data there.
 - Keep current MCP until we get into trouble.
 
+# Small improvements
+
+✅ Switch to "ultra2x" or "ultra" if it works
+
+✅ under "this will take about 30 minutes" you can say -- feel free to close this tab and come back later or something
+
+✅ agree on hiding confidence levels fornow
+
+# Task splitting
+
+Split up task into several smaller tasks? Main details, Competive landscape, Feature comparison, Pricing analysis. However, maybe, it makes more sense to perform immediate follow-up tasks for eacah competitor when entering a new competitor. This provides a simpler setup of just 1 task per company, with rich competitor info by linking the comptetitor.
+
+The result page can then be enriched by not just providing the main company result, but also adding a table for all competitors with key details.
+
+We can't do this endlessly though so there will be weak links that have no competition analyzed (or not all, at least). For this, maybe we should add a button to perform analysis for competition in this section (add a DB property: `has_analyzed_competitors:0|1`).
+
+✅ New analysis now does perform DEEP analysis (all competitor hostnames get analyzed as well)
+
+# Markdown version and MCP
+
+✅ Markdown version for analysis + all competitors
+
+✅ MCP should only have access to `/md/{hostname}` endpoint. This shuld be able to be hosted at smithery.
+
 ## Add LLM validation logic
 
 Problem: some competitors end up being sub-products of other companies and don't have their own (sub)domain, resulting in the fact that hostname is not correct. If we however allow for any `/subpath`, quality control wouldn't be sufficient. Quality control probably already isn't sufficient. Maybe, we should add validator properties such as `company_fits_criteria:boolean` into the datastructure and filter out based on that. This is great anyway!
@@ -81,18 +105,6 @@ To test whether or not this works, let's see the results of 10 new companies
 
 - Add categorization (enum "category" field with up to 15 high level categories)
 - Allow viewing all analyses in a category
-
-# Task splitting
-
-Split up task into several smaller tasks? Main details, Competive landscape, Feature comparison, Pricing analysis. However, maybe, it makes more sense to perform immediate follow-up tasks for eacah competitor when entering a new competitor. This provides a simpler setup of just 1 task per company, with rich competitor info by linking the comptetitor.
-
-The result page can then be enriched by not just providing the main company result, but also adding a table for all competitors with key details.
-
-We can't do this endlessly though so there will be weak links that have no competition analyzed (or not all, at least). For this, maybe we should add a button to perform analysis for competition in this section (add a DB property: `has_analyzed_competitors:0|1`).
-
-# Markdown version and MCP
-
-This is out of scope but would make it actually useful since now you can chat with it.
 
 # Bigger required refinements
 

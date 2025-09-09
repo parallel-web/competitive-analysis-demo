@@ -269,7 +269,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 16px;
             margin-bottom: 48px;
         }
@@ -571,6 +571,8 @@
                         style="width: 45%"></div>
                 </div>
                 <p class="text-gray-500 text-xs uppercase tracking-wide">This will take about 30 minutes</p>
+                <p class="text-gray-500 text-xs uppercase tracking-wide">Feel free to close this window and come back
+                    later</p>
             </div>
 
             <!-- Error State -->
@@ -793,15 +795,12 @@
                 <div class="content-text">${convertMarkdown(content)}</div>
                 ${basis ? `
                     <div class="collapsible-content">
-                        ${basis.confidence ? `
-                            <div class="mt-4">
-                                Confidence <span class="confidence-badge confidence-${basis.confidence}">${basis.confidence}</span>
-                            </div>
-                        ` : ''}
+                        
                         ${basis.reasoning ? `
                             <div class="reasoning-section">
                                 <h4 class="font-semibold mb-2 text-xs uppercase tracking-wide">AI Reasoning</h4>
                                 <p class="text-gray-600">${convertMarkdown(basis.reasoning)}</p>
+                                <p class="text-gray-600">${basis.confidence ? `<div class="mt-4">Confidence: ${basis.confidence}</div>` : ''}</p>
                             </div>
                         ` : ''}
                         ${basis.citations && basis.citations.length > 0 ? `

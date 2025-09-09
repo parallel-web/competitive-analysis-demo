@@ -3,6 +3,7 @@
   "name": "competitor-analysis",
   "main": "worker.ts",
   "compatibility_date": "2025-08-14",
+  "assets": { "directory": "./public" },
   "observability": { "logs": { "enabled": true } },
   "durable_objects": {
     "bindings": [
