@@ -2,6 +2,8 @@
 
 This is an intelligent competitive analysis tool that researches companies, finds competitors, mines reddit for user insights, and allows viewing and sharing complete reports publicly.
 
+Check the live website: https://competitive-analysis-demo.parallel.ai
+
 ## Features
 
 - ai company research
