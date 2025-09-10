@@ -11,6 +11,9 @@ Check the live website: https://competitive-analysis-demo.parallel.ai
 - reddit mining - authentic user opinions and sentiment
 - seo-optimized shareable reports
 - x/twitter auth with usage limits
+- search
+- admin panel
+- mcp
 
 ## Tech stack
 
