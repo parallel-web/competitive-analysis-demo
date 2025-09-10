@@ -12,12 +12,16 @@ import { DurableObject } from "cloudflare:workers";
 import { UserContext, withSimplerAuth } from "simplerauth-client";
 import { Parallel } from "parallel-web";
 //@ts-ignore
+import json_schema from "./public/task.schema.json";
+//@ts-ignore
 import indexHtml from "./index.html";
 //@ts-ignore
 import resultHtml from "./result.html";
 
 const DO_NAME = "v5";
 const ADMIN_USERNAME = "janwilmake";
+const NEW_VERSION_DATE = 1757510203227;
+
 export interface Env {
   COMPETITOR_ANALYSIS: DurableObjectNamespace<
     CompetitorAnalysisDO & QueryableHandler
@@ -28,7 +32,7 @@ export interface Env {
 }
 
 interface AnalysisRow {
-  hostname: string; // Changed from slug to hostname
+  hostname: string;
   company_domain: string;
   company_name: string;
   status: "pending" | "done";
@@ -136,6 +140,12 @@ async function isValidHostname(hostname: string): Promise<boolean> {
 
 function isAnalysisOld(createdAt: string): boolean {
   const createdDate = new Date(createdAt);
+
+  if (createdDate.valueOf() < NEW_VERSION_DATE) {
+    // it's old because we have a newer version since.
+    return true;
+  }
+
   const now = new Date();
   const diffInMs = now.getTime() - createdDate.getTime();
   const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
@@ -159,11 +169,16 @@ export default {
         switch (pathname) {
           case "/admin": {
             if (ctx.user?.username !== ADMIN_USERNAME) {
-              return new Response("Admin only");
+              return new Response("Admin only", { status: 401 });
             }
             return studioMiddleware(request, do_stub.raw, {
               dangerouslyDisableAuth: true,
             });
+          }
+          case "/import": {
+            if (ctx.user?.username !== ADMIN_USERNAME) {
+              return new Response("Admin only", { status: 401 });
+            }
           }
 
           case "/":
@@ -174,6 +189,10 @@ export default {
 
           case "/webhook":
             return handleWebhook(request, do_stub, env);
+
+          case "/dump": {
+            return handleDump(request, do_stub);
+          }
 
           default:
             if (pathname.startsWith("/analysis/")) {
@@ -187,6 +206,9 @@ export default {
             if (pathname.startsWith("/og/")) {
               const hostname = pathname.replace("/og/", "");
               return handleOg(hostname, do_stub);
+            }
+            if (pathname.startsWith("/search/")) {
+              return handleSearch(pathname, do_stub);
             }
             return handle404();
         }
@@ -429,7 +451,7 @@ function createDefaultOgSvg(hostname: string): string {
 function createCompetitorAnalysisOgSvg(
   companyName: string,
   hostname: string,
-  competitors: Array<{ name: string; website: string }>
+  competitors: Array<{ name: string; hostname: string }>
 ): string {
   // Limit competitors to 6 max and spread across full width
   const displayCompetitors = competitors.slice(0, 6);
@@ -447,33 +469,15 @@ function createCompetitorAnalysisOgSvg(
     .map((competitor, index) => {
       const x =
         displayCompetitors.length === 1 ? 600 : startX + index * spacing;
-      const domain = competitor.website
-        ? competitor.website.replace(/^https?:\/\//, "").replace(/\/$/, "")
-        : "";
-      const faviconUrl = domain
-        ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(
-            domain
-          )}&amp;sz=64`
-        : "";
+      const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(
+        competitor.hostname
+      )}&amp;sz=64`;
 
       return `
       <g transform="translate(${x}, 480)">
         <!-- Background circle -->
         <circle cx="0" cy="0" r="40" fill="#d8d0bf" opacity="0.2"/>
-        ${
-          faviconUrl
-            ? `
-        <!-- Company favicon -->
         <image x="-30" y="-30" width="60" height="60" href="${faviconUrl}" opacity="0.9"/>
-        `
-            : `
-        <!-- Fallback icon -->
-        <circle cx="0" cy="0" r="30" fill="#fb631b" opacity="0.3"/>
-        <text x="0" y="8" text-anchor="middle" class="gerstner" font-size="24" font-weight="500" fill="#1d1b16">
-          ${competitor.name.charAt(0).toUpperCase()}
-        </text>
-        `
-        }
         <!-- Company name -->
         <text x="0" y="65" text-anchor="middle" class="ft-mono" font-size="14" fill="#1d1b16" opacity="0.7">
           ${escapeXml(
@@ -565,25 +569,10 @@ async function handleMd(
   const result = JSON.parse(analysis.result);
   const analysisData = result.output?.content || {};
 
-  // Get competitor hostnames from the analysis
+  // Get competitor hostnames directly from the analysis
   const competitors = analysisData.competitors || [];
   const competitorHostnames = competitors
-    .map((comp: { website: string }) => {
-      if (!comp.website) return null;
-      // Extract hostname from URL
-      try {
-        const url = comp.website.startsWith("http")
-          ? comp.website
-          : `https://${comp.website}`;
-        return new URL(url).hostname;
-      } catch {
-        // If URL parsing fails, try to clean it up
-        return comp.website
-          .replace(/^https?:\/\//, "")
-          .replace(/\/$/, "")
-          .split("/")[0];
-      }
-    })
+    .map((comp: { hostname: string }) => comp.hostname)
     .filter(Boolean);
 
   // Fetch competitor analyses
@@ -1028,157 +1017,7 @@ const performAnalysis = async (
         url: `${url.protocol}//${url.host}/webhook`,
         event_types: ["task_run.status"],
       },
-      task_spec: {
-        output_schema: {
-          type: "json",
-          json_schema: {
-            type: "object",
-            description:
-              "Extract comprehensive competitive intelligence using deep web research across news, financial databases, social media, forums, and industry reports. Prioritize recent data and authoritative sources.",
-            required: [
-              "company_name",
-              "company_domain",
-              "headquarters_location",
-              "industry_sector",
-              "employee_count",
-              "business_description",
-              "unique_value_proposition",
-              "target_market_analysis",
-              "recent_news_developments",
-              "market_size_and_growth",
-              "competitive_landscape_overview",
-              "competitors",
-              "target_company_reddit_analysis",
-              "executive_summary",
-            ],
-            additionalProperties: false,
-            properties: {
-              company_name: {
-                type: "string",
-                description: "Full legal name of the company",
-              },
-              company_domain: {
-                type: "string",
-                description: "Primary website domain",
-              },
-              headquarters_location: {
-                type: "string",
-                description:
-                  "City, State/Province, Country where company headquarters is located",
-              },
-              industry_sector: {
-                type: "string",
-                description:
-                  "Primary industry sector and specific vertical with market context. 2-5 words.",
-              },
-              employee_count: {
-                type: "string",
-                description:
-                  "Current number of employees as specific number or range with source date",
-              },
-              linkedin_url: {
-                type: "string",
-                description:
-                  "Official LinkedIn company page URL, or 'Not found' if unavailable",
-              },
-              founded_year: {
-                type: "string",
-                description: "Year the company was founded",
-              },
-              total_funding_raised: {
-                type: "string",
-                description:
-                  "Total amount of funding raised with currency, or 'Not disclosed' if unknown",
-              },
-              latest_funding_round: {
-                type: "string",
-                description:
-                  "Most recent funding round with amount, type, date, and lead investor if available",
-              },
-              current_valuation: {
-                type: "string",
-                description:
-                  "Most recent company valuation if available, or 'Not publicly disclosed'",
-              },
-              business_description: {
-                type: "string",
-                description:
-                  "Comprehensive 2-3 paragraph description of the company's core business, products, services, target customers, and revenue model. Include specific product names and key differentiators.",
-              },
-              unique_value_proposition: {
-                type: "string",
-                description:
-                  "Clear statement of what makes this company unique in the market",
-              },
-              target_market_analysis: {
-                type: "string",
-                description:
-                  "1-2 paragraph analysis of the company's target market segments, customer demographics, geographic focus, and market positioning strategy.",
-              },
-              recent_news_developments: {
-                type: "string",
-                description:
-                  "Summary of significant company developments, product launches, partnerships, leadership changes, or strategic moves from the last 6-12 months with specific dates and details.",
-              },
-              market_size_and_growth: {
-                type: "string",
-                description:
-                  "Detailed analysis of the total addressable market size, growth rates, key market drivers, and future projections for the industry the company operates in.",
-              },
-
-              competitors: {
-                type: "array",
-                description:
-                  "3-6 key direct competitors. Only list competitors with website",
-                items: {
-                  type: "object",
-                  required: ["name", "website"],
-                  additionalProperties: false,
-                  properties: {
-                    name: {
-                      type: "string",
-                      description: "Competitor company name",
-                    },
-                    website: {
-                      type: "string",
-                      description:
-                        "Competitor website URL (format: https://hostname.com, no www, no pathname).",
-                    },
-                  },
-                },
-              },
-
-              competitive_landscape_overview: {
-                type: "string",
-                description:
-                  "Short summary (1 paragraph) of the competitive landscape and market dynamics",
-              },
-
-              target_company_reddit_analysis: {
-                type: "string",
-                description:
-                  "Comprehensive paragraph analysis of Reddit discussions specifically about the target company, including common themes, user experiences, comparisons to competitors, and insights from relevant subreddits.",
-              },
-
-              reddit_overall_sentiment: {
-                type: "string",
-                description:
-                  "Overall sentiment of the target company on Reddit: 'low', 'medium' or 'high'",
-              },
-              market_opportunities: {
-                type: "string",
-                description:
-                  "2-3 sentences analysis of underserved market segments, emerging trends, geographic expansion opportunities, or product/service gaps that represent growth opportunities for the target company.",
-              },
-              executive_summary: {
-                type: "string",
-                description:
-                  "Short (1 paragraph) executive summary covering the company's current market position, key competitive dynamics, most significant opportunities and threats, and critical strategic implications. Written for senior leadership decision-making.",
-              },
-            },
-          },
-        },
-      },
+      task_spec: { output_schema: { type: "json", json_schema } },
     },
     {
       headers: {
@@ -1282,27 +1121,12 @@ async function handleWebhook(
         // it's good.
 
         if (result.run.metadata?.isDeep) {
-          // perform deeper analysis too
-
-          const hostnames = (
-            result.output.content?.competitors as any[] | undefined
-          )
-            ?.map((comp: { website: string }) => {
-              if (!comp.website) return null;
-              // Extract hostname from URL
-              try {
-                const url = comp.website.startsWith("http")
-                  ? comp.website
-                  : `https://${comp.website}`;
-                return new URL(url).hostname;
-              } catch {
-                // If URL parsing fails, try to clean it up
-                return comp.website
-                  .replace(/^https?:\/\//, "")
-                  .replace(/\/$/, "")
-                  .split("/")[0];
-              }
-            })
+          // perform deeper analysis too - now using hostname directly
+          const competitors = result.output.content?.competitors as
+            | any[]
+            | undefined;
+          const hostnames = competitors
+            ?.map((comp: { hostname: string }) => comp.hostname)
             .filter(Boolean);
 
           if (hostnames?.length) {
@@ -1369,6 +1193,345 @@ async function handleWebhook(
   }
 
   return new Response("OK");
+}
+
+async function handleSearch(
+  pathname: string,
+  do_stub: DurableObjectStub<CompetitorAnalysisDO>
+): Promise<Response> {
+  const query = decodeURIComponent(pathname.replace("/search/", ""));
+
+  if (!query || query.trim().length === 0) {
+    return new Response("Search query is required", { status: 400 });
+  }
+
+  const searchResults = await do_stub.searchAnalyses(query.trim());
+
+  const createSearchCards = (analyses: AnalysisRow[]) => {
+    if (analyses.length === 0) {
+      return `<div class="text-center py-12">
+        <div class="w-16 h-16 mx-auto mb-6 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center">
+          <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">No results found</h3>
+        <p class="text-gray-500 text-lg">No analyses found for "${escapeHtml(
+          query
+        )}"</p>
+        <div class="mt-6">
+          <a href="/new?company=${encodeURIComponent(query)}" 
+             class="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity">
+            🔍 Analyze ${escapeHtml(query)}
+          </a>
+        </div>
+      </div>`;
+    }
+
+    return analyses
+      .map((analysis) => {
+        const initial = analysis.company_name.charAt(0).toUpperCase();
+        const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(
+          analysis.company_domain
+        )}&sz=64`;
+
+        const statusBadge = analysis.error
+          ? '<span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Error</span>'
+          : analysis.status === "pending"
+          ? '<span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Pending</span>'
+          : '<span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Complete</span>';
+
+        return `
+        <div class="company-card" onclick="window.location.href='/analysis/${
+          analysis.hostname
+        }'">
+          <div class="flex items-center space-x-4 mb-4">
+            <div class="company-logo-container relative">
+              <img src="${faviconUrl}" 
+                   alt="${escapeHtml(analysis.company_name)} logo"
+                   class="w-12 h-12 rounded-lg object-cover"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="company-logo w-12 h-12 hidden">${initial}</div>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <h4 class="font-semibold text-lg">${escapeHtml(
+                  analysis.company_name
+                )}</h4>
+                ${statusBadge}
+              </div>
+              <p class="text-sm text-gray-500">${escapeHtml(
+                analysis.company_domain
+              )}</p>
+            </div>
+          </div>
+          <p class="text-gray-600 text-sm mb-3">
+            ${
+              analysis.error
+                ? `Analysis failed: ${escapeHtml(
+                    analysis.error.substring(0, 100)
+                  )}...`
+                : analysis.status === "pending"
+                ? "Analysis in progress..."
+                : "Competitive analysis with market insights and Reddit community opinions"
+            }
+          </p>
+          <div class="flex items-center justify-between text-xs text-gray-500">
+            <span>📅 ${new Date(
+              analysis.created_at
+            ).toLocaleDateString()}</span>
+            <span>🔥 ${analysis.visits} views</span>
+          </div>
+        </div>
+      `;
+      })
+      .join("");
+  };
+
+  const searchCards = createSearchCards(searchResults);
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Search Results: ${escapeHtml(
+          query
+        )} - Competitor Analysis</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            @font-face {
+                font-family: 'FT System Mono';
+                src: url('https://assets.p0web.com/FTSystemMono-Regular.woff2') format('woff2');
+                font-weight: 400;
+                font-display: swap;
+            }
+            @font-face {
+                font-family: 'FT System Mono';
+                src: url('https://assets.p0web.com/FTSystemMono-Medium.woff2') format('woff2');
+                font-weight: 500;
+                font-display: swap;
+            }
+            @font-face {
+                font-family: 'Gerstner Programm';
+                src: url('https://assets.p0web.com/Gerstner-ProgrammRegular.woff2') format('woff2');
+                font-weight: 400;
+                font-display: swap;
+            }
+            @font-face {
+                font-family: 'Gerstner Programm';
+                src: url('https://assets.p0web.com/Gerstner-ProgrammMedium.woff2') format('woff2');
+                font-weight: 500;
+                font-display: swap;
+            }
+            :root {
+                --off-white: #fcfcfa;
+                --index-black: #1d1b16;
+                --neural: #d8d0bf;
+                --signal: #fb631b;
+            }
+            body {
+                font-family: 'FT System Mono', monospace;
+                background-color: var(--off-white);
+                color: var(--index-black);
+                line-height: 1.5;
+                font-size: 14px;
+            }
+            .gerstner {
+                font-family: 'Gerstner Programm', serif;
+                line-height: 1.2;
+            }
+            .company-card {
+                background: white;
+                border: 2px solid #e8e6e1;
+                border-radius: 4px;
+                padding: 24px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                position: relative;
+                overflow: hidden;
+            }
+            .company-card:hover {
+                border-color: var(--signal);
+            }
+            .company-logo {
+                width: 48px;
+                height: 48px;
+                background: var(--signal);
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                color: white;
+                font-size: 20px;
+            }
+            .company-logo-container {
+                position: relative;
+                width: 48px;
+                height: 48px;
+            }
+            .search-input {
+                width: 100%;
+                padding: 12px 16px;
+                border: 2px solid #e8e6e1;
+                border-radius: 4px;
+                font-size: 14px;
+                transition: all 0.2s ease;
+                background: white;
+                font-family: 'FT System Mono', monospace;
+            }
+            .search-input:focus {
+                outline: none;
+                border-color: var(--signal);
+            }
+        </style>
+    </head>
+    <body class="min-h-screen">
+        <!-- Header -->
+        <header class="py-6 border-b-2 border-gray-200">
+            <div class="max-w-6xl mx-auto px-6 flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="/" class="gerstner text-xl font-medium hover:text-gray-600">
+                        Competitor Analysis
+                    </a>
+                </div>
+                <p class="text-gray-600 text-sm uppercase tracking-wide">Search Results</p>
+            </div>
+        </header>
+
+        <!-- Search Section -->
+        <section class="py-8">
+            <div class="max-w-6xl mx-auto px-6">
+                <div class="max-w-2xl mx-auto mb-8">
+                    <form action="/search/" method="get" onsubmit="event.preventDefault(); window.location.href='/search/' + encodeURIComponent(this.querySelector('input').value);">
+                        <input type="text" 
+                               class="search-input" 
+                               placeholder="Search by company name, domain, or keywords..."
+                               value="${escapeHtml(query)}"
+                               autocomplete="off">
+                    </form>
+                </div>
+                
+                <div class="mb-6">
+                    <h1 class="gerstner text-2xl font-medium mb-2">
+                        Search Results for "${escapeHtml(query)}"
+                    </h1>
+                    <p class="text-gray-600 text-sm">
+                        Found ${searchResults.length} result${
+    searchResults.length === 1 ? "" : "s"
+  }
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${searchCards}
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-8 border-t-2 border-gray-200 mt-16">
+            <div class="max-w-6xl mx-auto px-6 flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-gray-600 text-xs uppercase tracking-wide hover:text-gray-800">← Back to Home</a>
+                </div>
+                <div class="text-gray-600 text-xs uppercase tracking-wide">
+                    AI-powered market research
+                </div>
+            </div>
+        </footer>
+    </body>
+    </html>
+  `;
+
+  return new Response(html, {
+    headers: { "Content-Type": "text/html" },
+  });
+}
+
+async function handleDump(
+  request: Request,
+  do_stub: DurableObjectStub<CompetitorAnalysisDO>
+): Promise<Response> {
+  const url = new URL(request.url);
+  const pageParam = url.searchParams.get("page");
+  const page = pageParam ? Math.max(1, parseInt(pageParam, 10)) : 1;
+
+  if (isNaN(page) || page < 1) {
+    return new Response("Invalid page number", { status: 400 });
+  }
+
+  const limit = 500;
+  const offset = (page - 1) * limit;
+
+  const { analyses, total } = await do_stub.getDumpData(limit, offset);
+
+  const processedAnalyses = analyses.map((analysis) => {
+    const baseItem = {
+      hostname: analysis.hostname,
+      company_domain: analysis.company_domain,
+      company_name: analysis.company_name,
+      status: analysis.status,
+      username: analysis.username,
+      profile_image_url: analysis.profile_image_url,
+      created_at: analysis.created_at,
+      updated_at: analysis.updated_at,
+      visits: analysis.visits,
+      error: analysis.error,
+    };
+
+    // If there's a result, parse it and extract run and output data
+    if (analysis.result) {
+      try {
+        const resultData = JSON.parse(analysis.result);
+
+        // Add run data
+        if (resultData.run) {
+          baseItem.run = resultData.run;
+        }
+
+        // Add output.basis if it exists
+        if (resultData.output?.basis) {
+          baseItem.basis = resultData.output.basis;
+        }
+
+        // Spread output.content onto the item if it exists
+        if (
+          resultData.output?.content &&
+          typeof resultData.output.content === "object"
+        ) {
+          Object.assign(baseItem, resultData.output.content);
+        }
+      } catch (error) {
+        // If JSON parsing fails, just include the raw result
+        console.error(
+          `Failed to parse result for ${analysis.hostname}:`,
+          error
+        );
+      }
+    }
+
+    return baseItem;
+  });
+
+  const response = {
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit),
+    hasNext: page * limit < total,
+    hasPrevious: page > 1,
+    data: processedAnalyses,
+  };
+
+  return new Response(JSON.stringify(response, null, 2), {
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=300", // Cache for 5 minutes
+    },
+  });
 }
 
 async function handleResult(
@@ -1652,6 +1815,82 @@ export class CompetitorAnalysisDO extends DurableObject<Env> {
     );
   }
 
+  async searchAnalyses(query: string): Promise<AnalysisRow[]> {
+    // Search by exact hostname match first
+    let results = this.sql.exec(
+      "SELECT * FROM analyses WHERE hostname = ? ORDER BY visits DESC, created_at DESC",
+      query
+    );
+
+    if (results.toArray().length > 0) {
+      return results.toArray() as AnalysisRow[];
+    }
+
+    // Search by company name (LIKE)
+    results = this.sql.exec(
+      `SELECT * FROM analyses 
+     WHERE company_name LIKE ? 
+     ORDER BY visits DESC, created_at DESC 
+     LIMIT 50`,
+      `%${query}%`
+    );
+
+    if (results.toArray().length > 0) {
+      return results.toArray() as AnalysisRow[];
+    }
+
+    // Search by domain (LIKE)
+    results = this.sql.exec(
+      `SELECT * FROM analyses 
+     WHERE company_domain LIKE ? 
+     ORDER BY visits DESC, created_at DESC 
+     LIMIT 50`,
+      `%${query}%`
+    );
+
+    if (results.toArray().length > 0) {
+      return results.toArray() as AnalysisRow[];
+    }
+
+    // Finally, search in result content for keywords (if result exists and contains the query)
+    results = this.sql.exec(
+      `SELECT * FROM analyses 
+     WHERE result IS NOT NULL 
+     AND result LIKE ? 
+     ORDER BY visits DESC, created_at DESC 
+     LIMIT 50`,
+      `%${query}%`
+    );
+
+    return results.toArray() as AnalysisRow[];
+  }
+
+  async getDumpData(
+    limit: number,
+    offset: number
+  ): Promise<{ analyses: AnalysisRow[]; total: number }> {
+    // Get total count
+    const countResults = this.sql.exec(
+      "SELECT COUNT(*) as count FROM analyses"
+    );
+    const total = (countResults.toArray()[0] as any).count;
+
+    // Get paginated data (excluding result column for efficiency)
+    const results = this.sql.exec(
+      `SELECT hostname, company_domain, company_name, status, username, 
+            profile_image_url, created_at, updated_at, visits, error, result
+     FROM analyses 
+     ORDER BY created_at DESC 
+     LIMIT ? OFFSET ?`,
+      limit,
+      offset
+    );
+
+    return {
+      analyses: results.toArray() as AnalysisRow[],
+      total,
+    };
+  }
   async getAnalysis(hostname: string): Promise<AnalysisRow | null> {
     const results = this.sql.exec(
       "SELECT * FROM analyses WHERE hostname = ?",

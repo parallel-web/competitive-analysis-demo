@@ -3,15 +3,11 @@
   "version": "1.0.0",
   "description": "AI-powered competitive analysis using Reddit insights",
   "main": "worker.ts",
-  "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "read -p \"Enter Cloudflare Account ID: \" account_id && CLOUDFLARE_ACCOUNT_ID=\"$account_id\" wrangler deploy"
-  },
   "dependencies": {
     "parallel-web": "^0.1.0",
-    "queryable-object": "^0.0.8",
+    "queryable-object": "^0.0.19",
     "simplerauth-client": "^0.0.14",
-    "with-mcp": "^0.0.12"
+    "with-mcp": "^0.0.14"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241106.0",

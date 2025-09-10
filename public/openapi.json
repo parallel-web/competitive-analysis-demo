@@ -105,6 +105,101 @@
         "tags": ["Analysis"]
       }
     },
+    "/search/{query}": {
+      "get": {
+        "summary": "Search analyses",
+        "description": "Searches through existing analyses by hostname (exact match), company name, domain, or content keywords using LIKE queries. Returns HTML results page.",
+        "operationId": "searchAnalyses",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "required": true,
+            "description": "Search query - can be hostname, company name, domain, or keywords",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "example": "openai"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results HTML page",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Search query is required",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Search"]
+      }
+    },
+    "/dump": {
+      "get": {
+        "summary": "Export analyses data",
+        "description": "Returns paginated JSON dump of all analyses with parsed result data. Each item contains database columns (excluding raw result) plus run metadata, basis data, and task schema content.",
+        "operationId": "dumpAnalyses",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page number for pagination (defaults to 1)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated analyses data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control header (5 minutes)"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid page number",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Export"]
+      }
+    },
     "/analysis/{hostname}": {
       "get": {
         "summary": "Get analysis result",
@@ -401,9 +496,256 @@
       }
     },
     "schemas": {
+      "DumpResponse": {
+        "type": "object",
+        "description": "Paginated response containing analyses data with parsed results",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page number",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Number of items per page",
+            "example": 500
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of analyses",
+            "example": 1250
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "Total number of pages",
+            "example": 3
+          },
+          "hasNext": {
+            "type": "boolean",
+            "description": "Whether there are more pages available",
+            "example": true
+          },
+          "hasPrevious": {
+            "type": "boolean",
+            "description": "Whether there are previous pages",
+            "example": false
+          },
+          "data": {
+            "type": "array",
+            "description": "Array of analysis items with parsed result data",
+            "items": {
+              "$ref": "#/components/schemas/DumpAnalysisItem"
+            }
+          }
+        },
+        "required": [
+          "page",
+          "limit",
+          "total",
+          "totalPages",
+          "hasNext",
+          "hasPrevious",
+          "data"
+        ]
+      },
+      "DumpAnalysisItem": {
+        "type": "object",
+        "description": "Analysis item containing database columns (excluding raw result), Parallel API run metadata, basis data, and task schema content",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DatabaseAnalysis"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "run": {
+                "$ref": "#/components/schemas/ParallelTaskRun",
+                "description": "Run metadata from Parallel API result"
+              },
+              "basis": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ParallelFieldBasis"
+                },
+                "description": "Basis data from output.basis containing citations and reasoning"
+              }
+            }
+          },
+          {
+            "$ref": "https://competitive-analysis-demo.parallel.ai/task.schema.json"
+          }
+        ]
+      },
+      "DatabaseAnalysis": {
+        "type": "object",
+        "description": "Database table columns (excluding result column)",
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "description": "Company domain hostname"
+          },
+          "company_domain": {
+            "type": "string",
+            "description": "Company domain"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "Company name"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "done"],
+            "description": "Analysis status"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the user who requested the analysis"
+          },
+          "profile_image_url": {
+            "type": "string",
+            "description": "Profile image URL of the user"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the analysis was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the analysis was last updated"
+          },
+          "visits": {
+            "type": "integer",
+            "description": "Number of times this analysis has been viewed"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true,
+            "description": "Error message if analysis failed"
+          }
+        },
+        "required": [
+          "hostname",
+          "company_domain",
+          "company_name",
+          "status",
+          "username",
+          "profile_image_url",
+          "created_at",
+          "updated_at",
+          "visits"
+        ]
+      },
+      "ParallelTaskRun": {
+        "type": "object",
+        "description": "Task run metadata from Parallel API",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "description": "ID of the task run"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "action_required",
+              "running",
+              "completed",
+              "failed",
+              "cancelling",
+              "cancelled"
+            ],
+            "description": "Status of the run"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Whether the run is currently active"
+          },
+          "processor": {
+            "type": "string",
+            "description": "Processor used for the run"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "User-provided metadata stored with the run"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of the creation of the task"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of the last modification to the task"
+          }
+        },
+        "required": [
+          "run_id",
+          "status",
+          "is_active",
+          "processor",
+          "created_at",
+          "modified_at"
+        ]
+      },
+      "ParallelFieldBasis": {
+        "type": "object",
+        "description": "Citations and reasoning supporting one field of a task output",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Name of the output field"
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParallelCitation"
+            },
+            "description": "List of citations supporting the output field"
+          },
+          "reasoning": {
+            "type": "string",
+            "description": "Reasoning for the output field"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["low", "medium", "high"],
+            "nullable": true,
+            "description": "Confidence level for the output field"
+          }
+        },
+        "required": ["field", "citations", "reasoning"]
+      },
+      "ParallelCitation": {
+        "type": "object",
+        "description": "A citation for a task output",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "description": "Title of the citation"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL of the citation"
+          },
+          "excerpts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "Excerpts from the citation supporting the output"
+          }
+        },
+        "required": ["url"]
+      },
       "AnalysisResult": {
         "type": "object",
-        "description": "Comprehensive competitive intelligence analysis result",
+        "description": "Comprehensive competitive intelligence analysis result (legacy schema, use task.schema.json reference instead)",
         "properties": {
           "company_name": {
             "type": "string",
@@ -521,6 +863,10 @@
           "website": {
             "type": "string",
             "description": "Competitor website URL"
+          },
+          "hostname": {
+            "type": "string",
+            "description": "Competitor hostname/domain"
           }
         },
         "required": ["name", "website"]
@@ -600,6 +946,10 @@
     {
       "name": "Analysis",
       "description": "Core analysis functionality"
+    },
+    {
+      "name": "Search",
+      "description": "Search through existing analyses"
     },
     {
       "name": "Export",

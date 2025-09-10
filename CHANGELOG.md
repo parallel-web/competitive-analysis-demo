@@ -93,20 +93,58 @@ We can't do this endlessly though so there will be weak links that have no compe
 
 ✅ MCP should only have access to `/md/{hostname}` endpoint. This shuld be able to be hosted at smithery.
 
+# Today
+
+✅ Link to MCP https://smithery.ai/server/@janwilmake/competitive-analysis-demo
+
+✅ Migrate data to parallel account.
+
+## ✅ `result.html`
+
+- We should show the sources like "[1] [2] [3] [4]" (clickable) when details are not shown, just right after the content, on a single line.
+- Let's move executive summary to the top
+- Let's move Reddit sentiment under Company Overview (move it up)
+- Under the company block, add a heading "Company Snapshot"
+- Put Executive Summary under Company Snapshot
+- Change Market Analysis to "Understand the Market"
+- Change Reddit Analysis to "Reddit Sentiment"
+- Put Market Opportunities within the Understand the Market heading
+- Make the header for Investments "Investment Story"
+- Make the header for features "Feature Comparison"
+
+# ✅ Improve the spec:
+
+- `competitors` now only has name and website, rather, it should have: name, hostname (without www, prioritize .com if available), and a short 1 sentence description of what the competitor does.
+- `investment_summary:string`: summarize every funding round and each investor in a bulleted format.
+- `products_summary:string`: ask the system to create a tabulated view of features or products offered by the company and whether it is offered by competitors.
+- `pricing_summary:string` ask the system to summarize the current pricing of the company, and analyze it against competitors.
+- Adjust the TAM description -- the system seems to be looking for TAM informationr eported by each company, instead, we should ask the system to externally research TAM. First, identify the company's market, then, for that market, do extra research to describe the TAM
+- `recent_news_developments` for a bullet list of recent news & development, with a date, description and heading for each.
+
+# Improvements
+
+✅ To improve DX, add logic to say it's old and needs to be refreshed if we have a new version!
+✅ rerun some.
+
 ## Add LLM validation logic
 
-Problem: some competitors end up being sub-products of other companies and don't have their own (sub)domain, resulting in the fact that hostname is not correct. If we however allow for any `/subpath`, quality control wouldn't be sufficient. Quality control probably already isn't sufficient. Maybe, we should add validator properties such as `company_fits_criteria:boolean` into the datastructure and filter out based on that. This is great anyway!
+- `company_fits_criteria:false` must result in error such that it's excluded from results.
 
-After we have proper LLM validation, allow /subpaths too in `/new`
+## Categorization, taxonomization, and keywords
 
-To test whether or not this works, let's see the results of 10 new companies
+- ✅ Add categorization (enum "category" field with up to 15 high level categories)
+- ✅ add `keywords` to schema
+- `worker.ts`: new endpoint `GET /search/%s` on category (exact) or on keywords using LIKE query (%s,) or on hostname, or on name (like). This must return a simple HTML with the search results.
+- On `results.html`, render category and keywords, and allow clicking on these
+- On `index.html`, render small search area in the header navigating to
 
-## Categorization
+## Search
 
-- Add categorization (enum "category" field with up to 15 high level categories)
-- Allow viewing all analyses in a category
+## Tabularize
 
-# Bigger required refinements
+Although this is less important for now, if I got more time, get the key company datapoints into the SQLite schema format. Also, use '@Queryable()' and allow anyone full readonly data access, also over MCP.
+
+# BACKLOG
 
 Do more to improve data quality:
 

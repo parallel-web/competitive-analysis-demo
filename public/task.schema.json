@@ -1,0 +1,176 @@
+{
+  "type": "object",
+  "description": "Extract comprehensive competitive intelligence using deep web research across news, financial databases, social media, forums, and industry reports. Prioritize recent data and authoritative sources.",
+  "required": [
+    "company_name",
+    "company_domain",
+    "headquarters_location",
+    "industry_sector",
+    "category",
+    "keywords",
+    "employee_count",
+    "company_fits_criteria",
+    "business_description",
+    "unique_value_proposition",
+    "target_market_analysis",
+    "recent_news_developments",
+    "market_size_and_growth",
+    "competitive_landscape_overview",
+    "competitors",
+    "target_company_reddit_analysis",
+    "investment_summary",
+    "products_summary",
+    "pricing_summary",
+    "executive_summary"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Full legal name of the company"
+    },
+    "company_domain": {
+      "type": "string",
+      "description": "Primary website domain"
+    },
+    "headquarters_location": {
+      "type": "string",
+      "description": "City, State/Province, Country where company headquarters is located"
+    },
+    "industry_sector": {
+      "type": "string",
+      "description": "Primary industry sector and specific vertical with market context. 2-5 words."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Enterprise Software",
+        "Consumer Technology",
+        "FinTech",
+        "HealthTech",
+        "E-commerce",
+        "EdTech",
+        "MarTech",
+        "Developer Tools",
+        "Cybersecurity",
+        "AI/ML Platform",
+        "IoT/Hardware",
+        "Media & Entertainment",
+        "Real Estate Tech",
+        "Transportation & Logistics",
+        "Other"
+      ],
+      "description": "Primary business category that best describes the company"
+    },
+    "keywords": {
+      "type": "string",
+      "description": "Comma-separated list of 5-10 relevant keywords that describe the company's products, services, and market positioning"
+    },
+    "employee_count": {
+      "type": "string",
+      "description": "Current number of employees as specific number or range with source date"
+    },
+    "company_fits_criteria": {
+      "type": "boolean",
+      "description": "True if this is an actual operating company with one or more real products or services being sold to customers (not just a landing page, domain squatter, or inactive company). Must have evidence of active business operations, customer base, or product offerings."
+    },
+    "linkedin_url": {
+      "type": "string",
+      "description": "Official LinkedIn company page URL, or 'Not found' if unavailable"
+    },
+    "founded_year": {
+      "type": "string",
+      "description": "Year the company was founded"
+    },
+    "total_funding_raised": {
+      "type": "string",
+      "description": "Total amount of funding raised with currency, or 'Not disclosed' if unknown"
+    },
+    "latest_funding_round": {
+      "type": "string",
+      "description": "Most recent funding round with amount, type, date, and lead investor if available"
+    },
+    "current_valuation": {
+      "type": "string",
+      "description": "Most recent company valuation if available, or 'Not publicly disclosed'"
+    },
+    "business_description": {
+      "type": "string",
+      "description": "Comprehensive 2-3 paragraph description of the company's core business, products, services, target customers, and revenue model. Include specific product names and key differentiators."
+    },
+    "unique_value_proposition": {
+      "type": "string",
+      "description": "Clear statement of what makes this company unique in the market"
+    },
+    "target_market_analysis": {
+      "type": "string",
+      "description": "1-2 paragraph analysis of the company's target market segments, customer demographics, geographic focus, and market positioning strategy."
+    },
+    "recent_news_developments": {
+      "type": "string",
+      "description": "Bullet list of 3-5 recent significant company developments from the last 6-12 months. Format each as: • [Date] - [Heading]: [Description]. Include product launches, partnerships, leadership changes, funding rounds, or strategic moves."
+    },
+    "market_size_and_growth": {
+      "type": "string",
+      "description": "Research and analyze the Total Addressable Market (TAM) for the specific market segment this company operates in. First identify the precise market category, then research external industry reports, analyst data, and market research to provide TAM size, growth rates, key market drivers, and future projections. Do not rely on company-reported TAM figures."
+    },
+    "investment_summary": {
+      "type": "string",
+      "description": "Comprehensive bullet-point summary of all known funding rounds in chronological order. Format each as: • [Date] - [Round Type]: [Amount] led by [Lead Investor] with participation from [Other Investors]. Include seed, Series A/B/C, etc."
+    },
+
+    "competitors": {
+      "type": "array",
+      "description": "3-6 key direct competitors with detailed information",
+      "items": {
+        "type": "object",
+        "required": ["name", "hostname", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Competitor company name"
+          },
+          "hostname": {
+            "type": "string",
+            "description": "Competitor website hostname without www prefix, prioritize .com domains when available (format: hostname.com)"
+          },
+          "description": {
+            "type": "string",
+            "description": "One sentence description of what this competitor does and their key differentiator"
+          }
+        }
+      }
+    },
+
+    "products_summary": {
+      "type": "string",
+      "description": "Create a detailed tabulated analysis of the company's key products/features and compare their availability across major competitors. Format as a comparison table showing which features/products are offered by the target company versus competitors."
+    },
+    "pricing_summary": {
+      "type": "string",
+      "description": "Comprehensive analysis of the company's current pricing model, tiers, and costs compared to competitors. Include specific pricing details, subscription models, freemium options, and competitive positioning analysis."
+    },
+
+    "competitive_landscape_overview": {
+      "type": "string",
+      "description": "Short summary (1 paragraph) of the competitive landscape and market dynamics"
+    },
+    "target_company_reddit_analysis": {
+      "type": "string",
+      "description": "Comprehensive paragraph analysis of Reddit discussions specifically about the target company, including common themes, user experiences, comparisons to competitors, and insights from relevant subreddits."
+    },
+    "reddit_overall_sentiment": {
+      "type": "string",
+      "description": "Overall sentiment of the target company on Reddit: 'low', 'medium' or 'high'"
+    },
+    "market_opportunities": {
+      "type": "string",
+      "description": "2-3 sentences analysis of underserved market segments, emerging trends, geographic expansion opportunities, or product/service gaps that represent growth opportunities for the target company."
+    },
+    "executive_summary": {
+      "type": "string",
+      "description": "Short (1 paragraph) executive summary covering the company's current market position, key competitive dynamics, most significant opportunities and threats, and critical strategic implications. Written for senior leadership decision-making."
+    }
+  }
+}

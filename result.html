@@ -432,6 +432,24 @@
             margin-right: 8px;
         }
 
+        .sources-line {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e8e6e1;
+            font-size: 12px;
+        }
+
+        .source-link {
+            color: var(--signal);
+            text-decoration: none;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+
         @media (max-width: 768px) {
             .content-wrapper {
                 padding: 0 16px;
@@ -549,7 +567,7 @@
                                 Analysis outdated
                             </p>
                             <p class="text-amber-700 text-xs mt-1">
-                                This analysis is over 2 weeks old. Market conditions may have changed.
+                                This analysis is outdated. Market conditions may have changed.
                             </p>
                         </div>
                     </div>
@@ -650,20 +668,34 @@
                     </div>
                 </div>
 
-                <!-- Company Overview -->
+                <!-- Company Snapshot -->
                 <section class="section-spacing">
-                    <h2 class="gerstner section-title">Company Overview</h2>
+                    <h2 class="gerstner section-title">Company Snapshot</h2>
+
+                    <!-- Executive Summary -->
+                    <div class="analysis-card" id="executive-summary-card">
+                        <!-- Executive summary will be injected here -->
+                    </div>
+
+                    <!-- Business Description -->
                     <div class="analysis-card" id="business-description-card">
                         <!-- Business description will be injected -->
                     </div>
+
+                    <!-- Unique Value Proposition -->
                     <div class="analysis-card" id="unique-value-proposition-card">
                         <!-- Unique value proposition will be injected -->
+                    </div>
+
+                    <!-- Reddit Sentiment -->
+                    <div class="analysis-card" id="reddit-analysis-card">
+                        <!-- Reddit analysis will be injected here -->
                     </div>
                 </section>
 
                 <!-- Market Analysis -->
                 <section class="section-spacing">
-                    <h2 class="gerstner section-title">Market Analysis</h2>
+                    <h2 class="gerstner section-title">Understand the Market</h2>
                     <div class="grid lg:grid-cols-2 gap-6">
                         <div class="analysis-card" id="target-market-card">
                             <!-- Target market analysis will be injected -->
@@ -675,13 +707,6 @@
                     <div class="analysis-card" id="recent-news-card">
                         <!-- Recent news will be injected -->
                     </div>
-
-
-                </section>
-
-                <!-- Strategic Analysis -->
-                <section class="section-spacing">
-                    <h2 class="gerstner section-title">Market Opportunities</h2>
                     <div class="analysis-card" id="market-opportunities-card">
                         <!-- Market opportunities will be injected -->
                     </div>
@@ -698,22 +723,6 @@
                     </div>
                 </section>
 
-                <!-- Reddit Analysis -->
-                <section class="section-spacing">
-                    <h2 class="gerstner section-title">Reddit Insights</h2>
-                    <div class="analysis-card" id="reddit-analysis-card">
-                        <!-- Reddit analysis will be injected here -->
-                    </div>
-                </section>
-
-                <!-- Executive Summary -->
-                <section class="section-spacing">
-                    <h2 class="gerstner section-title">Executive Summary</h2>
-                    <div class="analysis-card" id="executive-summary-card">
-                        <!-- Executive summary will be injected here -->
-                    </div>
-                </section>
-
                 <!-- Agent-Friendly Section -->
                 <div class="agent-section">
                     <h3 class="gerstner text-xl font-medium mb-4">Agent-Friendly Competitor Analysis</h3>
@@ -722,13 +731,23 @@
                             Perfect for AI agents and automated analysis. Get the complete competitor analysis
                             in structured markdown format with full context for all analyzed competitors.
                         </p>
-                        <a href="#" id="markdown-link" class="secondary-btn" target="_blank">
-                            <svg class="icon-terminal" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 4l3 3-3 3 1.5 1.5L9 12l-4.5-4.5L6 9zm6 6h6v2h-6v-2z" />
-                            </svg>
-                            View Markdown Analysis
-                        </a>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <a href="#" id="markdown-link" class="secondary-btn" target="_blank">
+                                <svg class="icon-terminal" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 4l3 3-3 3 1.5 1.5L9 12l-4.5-4.5L6 9zm6 6h6v2h-6v-2z" />
+                                </svg>
+                                View Markdown Analysis
+                            </a>
+                            <a href="https://smithery.ai/server/@janwilmake/competitive-analysis-demo"
+                                class="secondary-btn" target="_blank">
+                                <svg class="icon-terminal" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                                Try the MCP Server
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -783,6 +802,19 @@
             return analysis.result.output.basis.find(basis => basis.field === fieldName);
         }
 
+        // Helper function to create sources line
+        function createSourcesLine(basis) {
+            if (!basis || !basis.citations || basis.citations.length === 0) {
+                return '';
+            }
+
+            const sourceLinks = basis.citations.map((citation, index) => {
+                return `<a href="${citation.url}" target="_blank" class="source-link">[${index + 1}]</a>`;
+            }).join('');
+
+            return `<div class="sources-line">Sources: ${sourceLinks}</div>`;
+        }
+
         // Helper function to create analysis card with reasoning and citations
         function createAnalysisCard(content, fieldName, title) {
             const basis = getBasisForField(fieldName);
@@ -793,6 +825,7 @@
                     ${basis ? '<button class="expand-toggle" onclick="toggleDetails(this)">Details</button>' : ''}
                 </div>
                 <div class="content-text">${convertMarkdown(content)}</div>
+                ${basis && !basis.expanded ? createSourcesLine(basis) : ''}
                 ${basis ? `
                     <div class="collapsible-content">
                         
@@ -834,7 +867,7 @@
         // Helper function to create competitor card
         function createCompetitorCard(competitor) {
             // Extract domain from website URL
-            let domain = competitor.website;
+            let domain = competitor.website || competitor.hostname;
             try {
                 domain = domain.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
             } catch (e) {
@@ -865,7 +898,8 @@
                         </div>
                         <div class="flex-1">
                             <h3 class="gerstner text-lg font-medium mb-2">${competitor.name}</h3>
-                            <span class="text-signal hover:underline text-xs font-mono">${competitor.website}</span>
+                            <span class="text-signal hover:underline text-xs font-mono">${competitor.website || competitor.hostname}</span>
+                            <span class="text-signal text-xs">${competitor.description || ""}</span>
                         </div>
                     </div>
                 </div>
@@ -878,13 +912,22 @@
         function toggleDetails(button) {
             const card = button.closest('.analysis-card');
             const collapsible = card.querySelector('.collapsible-content');
+            const sourcesLine = card.querySelector('.sources-line');
 
             if (collapsible.classList.contains('expanded')) {
                 collapsible.classList.remove('expanded');
                 button.textContent = 'Details';
+                // Show sources line when collapsed
+                if (sourcesLine) {
+                    sourcesLine.style.display = 'block';
+                }
             } else {
                 collapsible.classList.add('expanded');
                 button.textContent = 'Hide';
+                // Hide sources line when expanded
+                if (sourcesLine) {
+                    sourcesLine.style.display = 'none';
+                }
             }
         }
 
@@ -977,6 +1020,13 @@
             document.getElementById('latest-funding').textContent = result.latest_funding_round || 'Not disclosed';
             document.getElementById('current-valuation').textContent = result.current_valuation || 'Not disclosed';
 
+            // Populate executive summary (moved to top under Company Snapshot)
+            document.getElementById('executive-summary-card').innerHTML = createAnalysisCard(
+                result.executive_summary || 'No executive summary available',
+                'executive_summary',
+                'Executive Summary'
+            );
+
             // Populate business description
             document.getElementById('business-description-card').innerHTML = createAnalysisCard(
                 result.business_description || 'No description available',
@@ -989,6 +1039,17 @@
                 result.unique_value_proposition || 'No unique value proposition analysis available',
                 'unique_value_proposition',
                 'Unique Value Proposition'
+            );
+
+            // Populate Reddit analysis (moved under Company Overview)
+            const sentimentText = result.reddit_overall_sentiment ?
+                `Reddit Sentiment: ${result.reddit_overall_sentiment.charAt(0).toUpperCase() + result.reddit_overall_sentiment.slice(1)}` :
+                'Reddit Sentiment';
+
+            document.getElementById('reddit-analysis-card').innerHTML = createAnalysisCard(
+                result.target_company_reddit_analysis || 'No Reddit analysis available',
+                'target_company_reddit_analysis',
+                sentimentText
             );
 
             // Populate target market analysis
@@ -1012,7 +1073,7 @@
                 'Recent News & Developments'
             );
 
-            // Populate market opportunities
+            // Populate market opportunities (moved under Understand the Market)
             document.getElementById('market-opportunities-card').innerHTML = createAnalysisCard(
                 result.market_opportunities || 'No market opportunities analysis available',
                 'market_opportunities',
@@ -1024,24 +1085,6 @@
                 result.competitive_landscape_overview || 'No competitive landscape overview available',
                 'competitive_landscape_overview',
                 'Competitive Landscape Overview'
-            );
-
-            // Populate Reddit analysis
-            const sentimentText = result.reddit_overall_sentiment ?
-                `Reddit Sentiment: ${result.reddit_overall_sentiment.charAt(0).toUpperCase() + result.reddit_overall_sentiment.slice(1)}` :
-                'Community Analysis';
-
-            document.getElementById('reddit-analysis-card').innerHTML = createAnalysisCard(
-                result.target_company_reddit_analysis || 'No Reddit analysis available',
-                'target_company_reddit_analysis',
-                sentimentText
-            );
-
-            // Populate executive summary
-            document.getElementById('executive-summary-card').innerHTML = createAnalysisCard(
-                result.executive_summary || 'No executive summary available',
-                'executive_summary',
-                'Executive Summary'
             );
 
             // Populate competitors

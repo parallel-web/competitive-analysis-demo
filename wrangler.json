@@ -2,6 +2,7 @@
   "$schema": "https://unpkg.com/wrangler@latest/config-schema.json",
   "name": "competitor-analysis",
   "main": "worker.ts",
+  "account_id": "aceab98f1a2fc658ed4e20bc307fa65a",
   "compatibility_date": "2025-08-14",
   "assets": { "directory": "./public" },
   "observability": { "logs": { "enabled": true } },
@@ -13,7 +14,7 @@
   "routes": [
     {
       "custom_domain": true,
-      "pattern": "competitors.p0web.com"
+      "pattern": "competitive-analysis-demo.parallel.ai"
     }
   ],
   "migrations": [
