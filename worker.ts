@@ -17,10 +17,10 @@ import json_schema from "./public/task.schema.json";
 import indexHtml from "./index.html";
 //@ts-ignore
 import resultHtml from "./result.html";
-
+const ANALYSIS_LIMIT = 5;
 const DO_NAME = "v5";
-const ADMIN_USERNAME = "janwilmake";
-const NEW_VERSION_DATE = 1757510203227;
+const ADMIN_USERNAMES = ["janwilmake", "khushi_shelat"];
+const NEW_VERSION_DATE = 1757517150949;
 
 export interface Env {
   COMPETITOR_ANALYSIS: DurableObjectNamespace<
@@ -43,6 +43,11 @@ interface AnalysisRow {
   visits: number;
   result: string | null;
   error: string | null;
+  // New fields
+  category: string | null;
+  business_description: string | null;
+  industry_sector: string | null;
+  keywords: string | null;
 }
 
 function getCompanyName(domain: string): string {
@@ -167,8 +172,28 @@ export default {
         const do_stub = env.COMPETITOR_ANALYSIS.get(do_id);
 
         switch (pathname) {
+          case "/migrate": {
+            if (!ADMIN_USERNAMES.includes(ctx.user?.username || "")) {
+              return new Response("Admin only", { status: 401 });
+            }
+
+            const result = await do_stub.handleMigrate();
+            return new Response(
+              JSON.stringify(
+                {
+                  message: "Migration completed",
+                  ...result,
+                },
+                null,
+                2
+              ),
+              {
+                headers: { "Content-Type": "application/json" },
+              }
+            );
+          }
           case "/admin": {
-            if (ctx.user?.username !== ADMIN_USERNAME) {
+            if (!ADMIN_USERNAMES.includes(ctx.user?.username || "")) {
               return new Response("Admin only", { status: 401 });
             }
             return studioMiddleware(request, do_stub.raw, {
@@ -176,7 +201,7 @@ export default {
             });
           }
           case "/import": {
-            if (ctx.user?.username !== ADMIN_USERNAME) {
+            if (!ADMIN_USERNAMES.includes(ctx.user?.username || "")) {
               return new Response("Admin only", { status: 401 });
             }
           }
@@ -311,10 +336,18 @@ async function handleHome(
             </div>
           </div>
           <p class="text-gray-600 text-sm mb-3">
-            Competitive analysis with market insights and Reddit community opinions
+            ${
+              analysis.business_description
+                ? escapeHtml(
+                    analysis.business_description.length > 120
+                      ? analysis.business_description.substring(0, 120) + "..."
+                      : analysis.business_description
+                  )
+                : "Competitive analysis with market insights and Reddit community opinions"
+            }
           </p>
           <div class="flex items-center justify-between text-xs text-gray-500">
-            <span>📊 Analysis available</span>
+            <span>${analysis.category || "📊 Analysis available"}</span>
             <span>🔥 ${analysis.visits} views</span>
           </div>
         </div>
@@ -567,15 +600,15 @@ async function handleMd(
   }
 
   const result = JSON.parse(analysis.result);
-  const analysisData = result.output?.content || {};
+  const primaryData = result.output?.content || {};
 
   // Get competitor hostnames directly from the analysis
-  const competitors = analysisData.competitors || [];
+  const competitors = primaryData.competitors || [];
   const competitorHostnames = competitors
     .map((comp: { hostname: string }) => comp.hostname)
     .filter(Boolean);
 
-  // Fetch competitor analyses
+  // Fetch all competitor analyses
   const competitorAnalyses = await Promise.all(
     competitorHostnames.map(async (compHostname: string) => {
       const compAnalysis = await do_stub.getAnalysis(compHostname);
@@ -588,6 +621,7 @@ async function handleMd(
         const compResult = JSON.parse(compAnalysis.result);
         return {
           hostname: compHostname,
+          company_name: compAnalysis.company_name,
           data: compResult.output?.content || {},
         };
       }
@@ -597,9 +631,9 @@ async function handleMd(
 
   const validCompetitorAnalyses = competitorAnalyses.filter(Boolean);
 
-  // Build markdown report
-  const markdown = buildCompetitiveLandscapeMarkdown(
-    { hostname, data: analysisData },
+  // Build comprehensive markdown report
+  const markdown = buildComprehensiveCompetitiveReport(
+    { hostname, company_name: analysis.company_name, data: primaryData },
     validCompetitorAnalyses
   );
 
@@ -611,115 +645,247 @@ async function handleMd(
   });
 }
 
-function buildCompetitiveLandscapeMarkdown(
-  primaryCompany: { hostname: string; data: any },
-  competitors: Array<{ hostname: string; data: any }>
+function buildComprehensiveCompetitiveReport(
+  primaryCompany: { hostname: string; company_name: string; data: any },
+  competitors: Array<{ hostname: string; company_name: string; data: any }>
 ): string {
   const allCompanies = [primaryCompany, ...competitors];
 
-  let markdown = `# Competitive Landscape Analysis\n\n`;
-  markdown += `Primary company: **${
-    primaryCompany.data.company_name || primaryCompany.hostname
-  }**\n\n`;
-
-  if (competitors.length > 0) {
-    markdown += `Competitors analyzed: ${competitors
-      .map((c) => c.data.company_name || c.hostname)
-      .join(", ")}\n\n`;
-  } else {
-    markdown += `*Note: No competitor analyses available for comparison.*\n\n`;
-  }
+  let markdown = `# Comprehensive Competitive Intelligence Report\n\n`;
+  markdown += `**Primary Company:** ${
+    primaryCompany.company_name || primaryCompany.hostname
+  }\n`;
+  markdown += `**Domain:** ${
+    primaryCompany.data.company_domain || primaryCompany.hostname
+  }\n`;
+  markdown += `**Analysis Date:** ${new Date().toLocaleDateString()}\n`;
+  markdown += `**Companies Analyzed:** ${allCompanies.length} (${primaryCompany.company_name} + ${competitors.length} competitors)\n\n`;
 
   markdown += `---\n\n`;
 
-  // Company Overview Section
-  markdown += `## Company Overview\n\n`;
-  allCompanies.forEach((company, index) => {
-    const isPrimary = index === 0;
-    const companyName = company.data.company_name || company.hostname;
+  // Executive Summary
+  if (primaryCompany.data.executive_summary) {
+    markdown += `## Executive Summary\n\n`;
+    markdown += `${primaryCompany.data.executive_summary}\n\n`;
+    markdown += `---\n\n`;
+  }
 
-    markdown += `### ${isPrimary ? "🎯 " : ""}${companyName}${
-      isPrimary ? " (Primary)" : ""
-    }\n\n`;
+  // Company Overview Section - side by side comparison
+  markdown += `## Company Overview Comparison\n\n`;
 
+  // Business Description
+  markdown += `### Business Description\n\n`;
+  allCompanies.forEach((company) => {
     if (company.data.business_description) {
-      markdown += `${company.data.business_description}\n\n`;
-    }
-
-    if (company.data.unique_value_proposition) {
-      markdown += `**Unique Value Proposition:** ${company.data.unique_value_proposition}\n\n`;
+      const indicator = company === primaryCompany ? "🎯 " : "";
+      markdown += `**${indicator}${company.company_name}:** ${company.data.business_description}\n\n`;
     }
   });
 
-  // Key Metrics Comparison
-  markdown += `## Key Metrics Comparison\n\n`;
-  markdown += `| Company | Industry | Founded | Employees | Funding | Valuation |\n`;
-  markdown += `|---------|----------|---------|-----------|---------|----------|\n`;
+  // Unique Value Propositions
+  const companiesWithUVP = allCompanies.filter(
+    (c) => c.data.unique_value_proposition
+  );
+  if (companiesWithUVP.length > 0) {
+    markdown += `### Unique Value Propositions\n\n`;
+    companiesWithUVP.forEach((company) => {
+      const indicator = company === primaryCompany ? "🎯 " : "";
+      markdown += `**${indicator}${company.company_name}:** ${company.data.unique_value_proposition}\n\n`;
+    });
+  }
 
-  allCompanies.forEach((company, index) => {
-    const isPrimary = index === 0;
-    const companyName = company.data.company_name || company.hostname;
-    const prefix = isPrimary ? "🎯 " : "";
+  // Company Details Comparison Table
+  markdown += `### Company Details Comparison\n\n`;
 
-    markdown += `| ${prefix}${companyName} | ${
-      company.data.industry_sector || "N/A"
-    } | ${company.data.founded_year || "N/A"} | ${
-      company.data.employee_count || "N/A"
-    } | ${company.data.total_funding_raised || "N/A"} | ${
-      company.data.current_valuation || "N/A"
-    } |\n`;
+  const detailFields = [
+    { key: "category", label: "Category" },
+    { key: "industry_sector", label: "Industry Sector" },
+    { key: "founded_year", label: "Founded" },
+    { key: "employee_count", label: "Employees" },
+    { key: "headquarters_location", label: "Headquarters" },
+    { key: "total_funding_raised", label: "Funding" },
+    { key: "current_valuation", label: "Valuation" },
+  ];
+
+  // Build header
+  markdown += `| Field | ${allCompanies
+    .map((c) =>
+      c === primaryCompany ? `🎯 **${c.company_name}**` : c.company_name
+    )
+    .join(" | ")} |\n`;
+  markdown += `|-------|${allCompanies.map(() => "-------").join("|")}|\n`;
+
+  // Build rows
+  detailFields.forEach((field) => {
+    const hasData = allCompanies.some(
+      (c) =>
+        c.data[field.key] &&
+        c.data[field.key] !== "Not found" &&
+        c.data[field.key] !== "Not disclosed" &&
+        c.data[field.key] !== "Not publicly disclosed"
+    );
+    if (hasData) {
+      markdown += `| **${field.label}** | ${allCompanies
+        .map((c) => {
+          const value = c.data[field.key];
+          if (
+            !value ||
+            value === "Not found" ||
+            value === "Not disclosed" ||
+            value === "Not publicly disclosed"
+          ) {
+            return "N/A";
+          }
+          return value;
+        })
+        .join(" | ")} |\n`;
+    }
   });
 
   markdown += `\n`;
 
-  // Market Analysis
-  markdown += `## Market Analysis\n\n`;
+  // Investment & Funding Comparison
+  const companiesWithFunding = allCompanies.filter(
+    (c) =>
+      (c.data.total_funding_raised &&
+        c.data.total_funding_raised !== "Not disclosed") ||
+      (c.data.current_valuation &&
+        c.data.current_valuation !== "Not publicly disclosed") ||
+      c.data.investment_summary
+  );
 
-  if (primaryCompany.data.market_size_and_growth) {
-    markdown += `### Market Size & Growth\n`;
-    markdown += `${primaryCompany.data.market_size_and_growth}\n\n`;
+  if (companiesWithFunding.length > 0) {
+    markdown += `## Investment & Funding Analysis\n\n`;
+    companiesWithFunding.forEach((company) => {
+      const indicator = company === primaryCompany ? "🎯 " : "";
+      markdown += `### ${indicator}${company.company_name}\n\n`;
+
+      if (
+        company.data.total_funding_raised &&
+        company.data.total_funding_raised !== "Not disclosed"
+      ) {
+        markdown += `**Total Funding:** ${company.data.total_funding_raised}\n\n`;
+      }
+
+      if (
+        company.data.current_valuation &&
+        company.data.current_valuation !== "Not publicly disclosed"
+      ) {
+        markdown += `**Valuation:** ${company.data.current_valuation}\n\n`;
+      }
+
+      if (company.data.latest_funding_round) {
+        markdown += `**Latest Round:** ${company.data.latest_funding_round}\n\n`;
+      }
+
+      if (company.data.investment_summary) {
+        markdown += `${company.data.investment_summary}\n\n`;
+      }
+    });
   }
 
+  // Market Analysis Comparison
+  const companiesWithMarketData = allCompanies.filter(
+    (c) =>
+      c.data.market_size_and_growth ||
+      c.data.target_market_analysis ||
+      c.data.market_opportunities
+  );
+
+  if (companiesWithMarketData.length > 0) {
+    markdown += `## Market Analysis Comparison\n\n`;
+
+    // Market Size & Growth
+    const companiesWithMarketSize = companiesWithMarketData.filter(
+      (c) => c.data.market_size_and_growth
+    );
+    if (companiesWithMarketSize.length > 0) {
+      markdown += `### Market Size & Growth Analysis\n\n`;
+      companiesWithMarketSize.forEach((company) => {
+        const indicator = company === primaryCompany ? "🎯 " : "";
+        markdown += `**${indicator}${company.company_name}:** ${company.data.market_size_and_growth}\n\n`;
+      });
+    }
+
+    // Target Market Analysis
+    const companiesWithTargetMarket = companiesWithMarketData.filter(
+      (c) => c.data.target_market_analysis
+    );
+    if (companiesWithTargetMarket.length > 0) {
+      markdown += `### Target Market Analysis\n\n`;
+      companiesWithTargetMarket.forEach((company) => {
+        const indicator = company === primaryCompany ? "🎯 " : "";
+        markdown += `**${indicator}${company.company_name}:** ${company.data.target_market_analysis}\n\n`;
+      });
+    }
+
+    // Market Opportunities
+    const companiesWithOpportunities = companiesWithMarketData.filter(
+      (c) => c.data.market_opportunities
+    );
+    if (companiesWithOpportunities.length > 0) {
+      markdown += `### Market Opportunities\n\n`;
+      companiesWithOpportunities.forEach((company) => {
+        const indicator = company === primaryCompany ? "🎯 " : "";
+        markdown += `**${indicator}${company.company_name}:** ${company.data.market_opportunities}\n\n`;
+      });
+    }
+  }
+
+  // Competitive Landscape
   if (primaryCompany.data.competitive_landscape_overview) {
-    markdown += `### Competitive Landscape\n`;
+    markdown += `## Competitive Landscape Overview\n\n`;
     markdown += `${primaryCompany.data.competitive_landscape_overview}\n\n`;
   }
 
-  // Target Market Analysis
-  markdown += `## Target Market Analysis\n\n`;
-  allCompanies.forEach((company, index) => {
-    const isPrimary = index === 0;
-    const companyName = company.data.company_name || company.hostname;
+  // Products & Features Comparison
+  const companiesWithProducts = allCompanies.filter(
+    (c) => c.data.products_summary
+  );
+  if (companiesWithProducts.length > 0) {
+    markdown += `## Products & Features Analysis\n\n`;
+    companiesWithProducts.forEach((company) => {
+      const indicator = company === primaryCompany ? "🎯 " : "";
+      markdown += `### ${indicator}${company.company_name}\n\n`;
+      markdown += `${company.data.products_summary}\n\n`;
+    });
+  }
 
-    if (company.data.target_market_analysis) {
-      markdown += `### ${isPrimary ? "🎯 " : ""}${companyName}\n`;
-      markdown += `${company.data.target_market_analysis}\n\n`;
-    }
-  });
+  // Pricing Comparison
+  const companiesWithPricing = allCompanies.filter(
+    (c) => c.data.pricing_summary
+  );
+  if (companiesWithPricing.length > 0) {
+    markdown += `## Pricing Analysis\n\n`;
+    companiesWithPricing.forEach((company) => {
+      const indicator = company === primaryCompany ? "🎯 " : "";
+      markdown += `### ${indicator}${company.company_name}\n\n`;
+      markdown += `${company.data.pricing_summary}\n\n`;
+    });
+  }
 
-  // Recent Developments
-  markdown += `## Recent Developments\n\n`;
-  allCompanies.forEach((company, index) => {
-    const isPrimary = index === 0;
-    const companyName = company.data.company_name || company.hostname;
-
-    if (company.data.recent_news_developments) {
-      markdown += `### ${isPrimary ? "🎯 " : ""}${companyName}\n`;
+  // Recent Developments Comparison
+  const companiesWithNews = allCompanies.filter(
+    (c) => c.data.recent_news_developments
+  );
+  if (companiesWithNews.length > 0) {
+    markdown += `## Recent Developments\n\n`;
+    companiesWithNews.forEach((company) => {
+      const indicator = company === primaryCompany ? "🎯 " : "";
+      markdown += `### ${indicator}${company.company_name}\n\n`;
       markdown += `${company.data.recent_news_developments}\n\n`;
-    }
-  });
+    });
+  }
 
-  // Reddit Sentiment Analysis (only for companies that have it)
-  const companiesWithRedditData = allCompanies.filter(
+  // Reddit Community Insights Comparison
+  const companiesWithReddit = allCompanies.filter(
     (c) => c.data.target_company_reddit_analysis
   );
-  if (companiesWithRedditData.length > 0) {
-    markdown += `## Reddit Community Insights\n\n`;
+  if (companiesWithReddit.length > 0) {
+    markdown += `## Reddit Community Insights Comparison\n\n`;
 
-    companiesWithRedditData.forEach((company, index) => {
-      const isPrimaryInList = company.hostname === primaryCompany.hostname;
-      const companyName = company.data.company_name || company.hostname;
-      const sentiment = company.data.reddit_overall_sentiment || "Unknown";
+    companiesWithReddit.forEach((company) => {
+      const sentiment = company.data.reddit_overall_sentiment || "unknown";
       const sentimentEmoji =
         sentiment === "high"
           ? "😊"
@@ -729,91 +895,157 @@ function buildCompetitiveLandscapeMarkdown(
           ? "😞"
           : "❓";
 
-      markdown += `### ${
-        isPrimaryInList ? "🎯 " : ""
-      }${companyName} ${sentimentEmoji} (${sentiment} sentiment)\n`;
+      const indicator = company === primaryCompany ? "🎯 " : "";
+      markdown += `### ${indicator}${company.company_name} ${sentimentEmoji} (${sentiment} sentiment)\n\n`;
       markdown += `${company.data.target_company_reddit_analysis}\n\n`;
     });
-  }
 
-  // Market Opportunities
-  const companiesWithOpportunities = allCompanies.filter(
-    (c) => c.data.market_opportunities
-  );
-  if (companiesWithOpportunities.length > 0) {
-    markdown += `## Market Opportunities\n\n`;
-
-    companiesWithOpportunities.forEach((company) => {
-      const isPrimaryInList = company.hostname === primaryCompany.hostname;
-      const companyName = company.data.company_name || company.hostname;
-
-      markdown += `### ${isPrimaryInList ? "🎯 " : ""}${companyName}\n`;
-      markdown += `${company.data.market_opportunities}\n\n`;
-    });
-  }
-
-  // Executive Summary
-  markdown += `## Executive Summary\n\n`;
-
-  if (primaryCompany.data.executive_summary) {
-    markdown += `### Primary Company Analysis\n`;
-    markdown += `${primaryCompany.data.executive_summary}\n\n`;
-  }
-
-  if (competitors.length > 0) {
-    markdown += `### Competitive Positioning\n`;
-    markdown += `Based on the analysis of ${competitors.length} competitor${
-      competitors.length === 1 ? "" : "s"
-    }, `;
-    markdown += `${
-      primaryCompany.data.company_name || primaryCompany.hostname
-    } operates in a `;
-
-    const totalCompetitors = primaryCompany.data.competitors?.length || 0;
-    if (totalCompetitors > 3) {
-      markdown += `highly competitive market with ${totalCompetitors} identified competitors. `;
-    } else if (totalCompetitors > 1) {
-      markdown += `moderately competitive market with ${totalCompetitors} main competitors. `;
-    } else {
-      markdown += `nascent market with limited direct competition. `;
-    }
-
-    markdown += `Key differentiators and strategic positioning should focus on the unique value propositions identified above.\n\n`;
-  }
-
-  // Company Details Table
-  markdown += `## Detailed Company Information\n\n`;
-
-  const fields = [
-    { key: "company_domain", label: "Domain" },
-    { key: "headquarters_location", label: "Headquarters" },
-    { key: "linkedin_url", label: "LinkedIn" },
-    { key: "latest_funding_round", label: "Latest Funding" },
-  ];
-
-  fields.forEach((field) => {
-    const companiesWithField = allCompanies.filter((c) => c.data[field.key]);
-    if (companiesWithField.length > 0) {
-      markdown += `### ${field.label}\n\n`;
-      companiesWithField.forEach((company) => {
-        const isPrimaryInList = company.hostname === primaryCompany.hostname;
-        const companyName = company.data.company_name || company.hostname;
-        markdown += `- ${isPrimaryInList ? "🎯 " : ""}**${companyName}:** ${
-          company.data[field.key]
-        }\n`;
+    // Reddit Sentiment Summary Table
+    if (companiesWithReddit.length > 1) {
+      markdown += `### Reddit Sentiment Summary\n\n`;
+      markdown += `| Company | Sentiment | Analysis Available |\n`;
+      markdown += `|---------|-----------|-------------------|\n`;
+      companiesWithReddit.forEach((company) => {
+        const sentiment = company.data.reddit_overall_sentiment || "Unknown";
+        const sentimentEmoji =
+          sentiment === "high"
+            ? "😊"
+            : sentiment === "medium"
+            ? "😐"
+            : sentiment === "low"
+            ? "😞"
+            : "❓";
+        const indicator = company === primaryCompany ? "🎯 " : "";
+        markdown += `| ${indicator}${company.company_name} | ${sentimentEmoji} ${sentiment} | ✅ |\n`;
       });
       markdown += `\n`;
     }
-  });
+  }
+
+  // Cross-Company Strategic Analysis
+  if (allCompanies.length > 1) {
+    markdown += `## Cross-Company Strategic Analysis\n\n`;
+
+    markdown += `### Key Differentiators\n\n`;
+    allCompanies.forEach((company) => {
+      if (company.data.unique_value_proposition) {
+        const indicator = company === primaryCompany ? "🎯 " : "";
+        markdown += `**${indicator}${
+          company.company_name
+        }:** Focus on ${company.data.unique_value_proposition.toLowerCase()}\n\n`;
+      }
+    });
+
+    // Competitive Positioning
+    markdown += `### Competitive Positioning\n\n`;
+    markdown += `Based on the analysis of ${allCompanies.length} companies:\n\n`;
+
+    // Funding comparison
+    const fundedCompanies = allCompanies.filter(
+      (c) =>
+        c.data.total_funding_raised &&
+        c.data.total_funding_raised !== "Not disclosed"
+    );
+    if (fundedCompanies.length > 1) {
+      markdown += `**Funding Landscape:**\n`;
+      fundedCompanies
+        .sort((a, b) => {
+          // Simple comparison - companies with higher funding mentioned first
+          const aFunding = a.data.total_funding_raised || "";
+          const bFunding = b.data.total_funding_raised || "";
+          return bFunding.localeCompare(aFunding);
+        })
+        .forEach((company) => {
+          const indicator = company === primaryCompany ? "🎯 " : "";
+          markdown += `• ${indicator}${company.company_name}: ${company.data.total_funding_raised}\n`;
+        });
+      markdown += `\n`;
+    }
+
+    // Employee count comparison
+    const companiesWithEmployees = allCompanies.filter(
+      (c) => c.data.employee_count && c.data.employee_count !== "Not found"
+    );
+    if (companiesWithEmployees.length > 1) {
+      markdown += `**Company Size:**\n`;
+      companiesWithEmployees.forEach((company) => {
+        const indicator = company === primaryCompany ? "🎯 " : "";
+        markdown += `• ${indicator}${company.company_name}: ${company.data.employee_count} employees\n`;
+      });
+      markdown += `\n`;
+    }
+  }
+
+  // Strategic Recommendations for Primary Company
+  markdown += `## Strategic Implications for ${primaryCompany.company_name}\n\n`;
+
+  markdown += `### Competitive Intelligence Summary\n\n`;
+  markdown += `• **Market Position:** Competing against ${competitors.length} analyzed competitors\n`;
+
+  if (primaryCompany.data.reddit_overall_sentiment) {
+    markdown += `• **Community Sentiment:** ${
+      primaryCompany.data.reddit_overall_sentiment.charAt(0).toUpperCase() +
+      primaryCompany.data.reddit_overall_sentiment.slice(1)
+    } sentiment on Reddit\n`;
+  }
+
+  if (primaryCompany.data.unique_value_proposition) {
+    markdown += `• **Key Differentiator:** ${primaryCompany.data.unique_value_proposition}\n`;
+  }
+
+  // Compare against competitors
+  if (competitors.length > 0) {
+    const competitorSentiments = competitors
+      .filter((c) => c.data.reddit_overall_sentiment)
+      .map((c) => c.data.reddit_overall_sentiment);
+
+    if (competitorSentiments.length > 0) {
+      const avgSentiment =
+        competitorSentiments.reduce((acc, sentiment) => {
+          if (sentiment === "high") return acc + 3;
+          if (sentiment === "medium") return acc + 2;
+          if (sentiment === "low") return acc + 1;
+          return acc;
+        }, 0) / competitorSentiments.length;
+
+      const primarySentimentScore =
+        primaryCompany.data.reddit_overall_sentiment === "high"
+          ? 3
+          : primaryCompany.data.reddit_overall_sentiment === "medium"
+          ? 2
+          : primaryCompany.data.reddit_overall_sentiment === "low"
+          ? 1
+          : 0;
+
+      if (primarySentimentScore > avgSentiment) {
+        markdown += `• **Sentiment Advantage:** Higher community sentiment than competitor average\n`;
+      } else if (primarySentimentScore < avgSentiment) {
+        markdown += `• **Sentiment Opportunity:** Room to improve community perception relative to competitors\n`;
+      }
+    }
+  }
+
+  markdown += `\n### Recommendations\n\n`;
+  markdown += `1. **Monitor Competitive Developments:** Keep tracking the ${competitors.length} identified competitors for strategic changes\n`;
+  markdown += `2. **Leverage Unique Positioning:** Continue to emphasize differentiation in market communications\n`;
+  markdown += `3. **Community Engagement:** ${
+    primaryCompany.data.reddit_overall_sentiment === "high"
+      ? "Maintain"
+      : "Improve"
+  } Reddit and social media presence\n`;
+  markdown += `4. **Regular Analysis:** Update this competitive analysis quarterly to track market shifts\n\n`;
 
   // Footer
   markdown += `---\n\n`;
-  markdown += `*Analysis generated on ${new Date().toLocaleDateString()} for competitive intelligence purposes.*\n`;
-  markdown += `*Primary company data may be more comprehensive than competitor data depending on analysis availability.*\n`;
+  markdown += `*Comprehensive competitive intelligence report generated on ${new Date().toLocaleDateString()}*\n\n`;
+  markdown += `**Data Sources:** ${allCompanies.length} company analyses including AI-powered research, Reddit sentiment analysis, and public market data\n\n`;
+  markdown += `**Coverage:** ${
+    primaryCompany.company_name
+  } (primary) + ${competitors.map((c) => c.company_name).join(", ")}\n\n`;
+  markdown += `*For the most current information, please verify directly with company sources and consider conducting follow-up research.*\n`;
 
   return markdown;
 }
-
 async function handleNew(
   request: Request,
   do_stub: DurableObjectStub<CompetitorAnalysisDO>,
@@ -931,7 +1163,7 @@ async function handleNew(
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-blue-800">
             <div class="font-semibold mb-2">What you get:</div>
             <ul class="text-left space-y-1">
-              <li>• 5 free competitive analyses</li>
+              <li>• 1 free competitive analysis</li>
               <li>• AI-powered market research</li>
               <li>• Reddit community insights</li>
               <li>• Comprehensive competitor profiles</li>
@@ -964,9 +1196,12 @@ async function handleNew(
 
   // Check user limits
   const userAnalyses = await do_stub.getUserAnalysisCount(ctx.user?.username);
-  if (userAnalyses >= 5 && ctx.user.username !== ADMIN_USERNAME) {
+  if (
+    userAnalyses >= ANALYSIS_LIMIT &&
+    !ADMIN_USERNAMES.includes(ctx.user?.username || "")
+  ) {
     return new Response(
-      "Maximum of 5 analyses allowed per user. Host it yourself if you need more! \n\nhttps://github.com/janwilmake/competitor-analysis",
+      `Maximum of ${ANALYSIS_LIMIT} analyses allowed per user. Host it yourself if you need more! \n\nhttps://github.com/janwilmake/competitor-analysis`,
       { status: 429 }
     );
   }
@@ -1010,7 +1245,7 @@ const performAnalysis = async (
   const taskRun = await parallel.beta.taskRun.create(
     {
       input: `Conduct comprehensive competitive intelligence analysis for company: ${hostname} including a Reddit sentiment analysis`,
-      processor: "ultra2x",
+      processor: "ultra8x",
       metadata: { hostname, isDeep, username, profile_image_url },
       mcp_servers: [{ name: "Reddit", url: env.MCP_URL, type: "url" }],
       webhook: {
@@ -1038,6 +1273,10 @@ const performAnalysis = async (
     visits: 0,
     result: null,
     error: null,
+    category: null,
+    business_description: null,
+    industry_sector: null,
+    keywords: null,
   });
 };
 
@@ -1090,6 +1329,18 @@ async function handleWebhook(
         betas: ["mcp-server-2025-07-17"],
       });
 
+      const analysisData = result.output?.content || {};
+
+      // Check if company_fits_criteria is false
+      if (analysisData.company_fits_criteria === false) {
+        await do_stub.updateAnalysisResult(
+          hostname,
+          null,
+          "This domain does not appear to be an active company with real products or services. Please try a different company."
+        );
+        return new Response("OK");
+      }
+
       const hasEmptyString = result.output.content
         ? !!Object.values(result.output.content).find((x) => x === "")
         : true;
@@ -1111,14 +1362,21 @@ async function handleWebhook(
           JSON.stringify(result),
           "Could not complete task - outputs contained empty strings. Please try again."
         );
-      } else if (hasNoCompetitors) {
-        await do_stub.updateAnalysisResult(
-          hostname,
-          JSON.stringify(result),
-          "Could not complete task - No competitors found. Please try again."
-        );
+        // } else if (hasNoCompetitors) {
+        //   await do_stub.updateAnalysisResult(
+        //     hostname,
+        //     JSON.stringify(result),
+        //     "Could not complete task - No competitors found. Please try again."
+        //   );
       } else {
-        // it's good.
+        // it's good - update the analysis with all the new fields
+        const updateData = {
+          company_name: analysisData.company_name || null,
+          category: analysisData.category || null,
+          business_description: analysisData.business_description || null,
+          industry_sector: analysisData.industry_sector || null,
+          keywords: analysisData.keywords || null,
+        };
 
         if (result.run.metadata?.isDeep) {
           // perform deeper analysis too - now using hostname directly
@@ -1164,18 +1422,19 @@ async function handleWebhook(
           }
         }
 
-        await do_stub.updateAnalysisResult(
+        await do_stub.updateAnalysisResultWithData(
           hostname,
           JSON.stringify(result),
-          null
+          null,
+          updateData
         );
       }
     } catch (error) {
-      console.error("Error fetching result:", error);
+      console.error("Error fetching result: ", error);
       await do_stub.updateAnalysisResult(
         hostname,
         null,
-        "Error fetching result"
+        "Error fetching result: " + error?.message
       );
     }
   } else if (
@@ -1267,7 +1526,13 @@ async function handleSearch(
           </div>
           <p class="text-gray-600 text-sm mb-3">
             ${
-              analysis.error
+              analysis.business_description
+                ? escapeHtml(
+                    analysis.business_description.length > 120
+                      ? analysis.business_description.substring(0, 120) + "..."
+                      : analysis.business_description
+                  )
+                : analysis.error
                 ? `Analysis failed: ${escapeHtml(
                     analysis.error.substring(0, 100)
                   )}...`
@@ -1277,9 +1542,9 @@ async function handleSearch(
             }
           </p>
           <div class="flex items-center justify-between text-xs text-gray-500">
-            <span>📅 ${new Date(
-              analysis.created_at
-            ).toLocaleDateString()}</span>
+            <span>${analysis.category || "📅"} ${new Date(
+          analysis.created_at
+        ).toLocaleDateString()}</span>
             <span>🔥 ${analysis.visits} views</span>
           </div>
         </div>
@@ -1480,6 +1745,10 @@ async function handleDump(
       updated_at: analysis.updated_at,
       visits: analysis.visits,
       error: analysis.error,
+      category: analysis.category,
+      business_description: analysis.business_description,
+      industry_sector: analysis.industry_sector,
+      keywords: analysis.keywords,
     };
 
     // If there's a result, parse it and extract run and output data
@@ -1492,17 +1761,17 @@ async function handleDump(
           baseItem.run = resultData.run;
         }
 
-        // Add output.basis if it exists
-        if (resultData.output?.basis) {
-          baseItem.basis = resultData.output.basis;
-        }
-
         // Spread output.content onto the item if it exists
         if (
           resultData.output?.content &&
           typeof resultData.output.content === "object"
         ) {
           Object.assign(baseItem, resultData.output.content);
+        }
+
+        // Add output.basis if it exists
+        if (resultData.output?.basis) {
+          baseItem.basis = resultData.output.basis;
         }
       } catch (error) {
         // If JSON parsing fails, just include the raw result
@@ -1775,7 +2044,7 @@ export class CompetitorAnalysisDO extends DurableObject<Env> {
   }
 
   private initDatabase() {
-    // Update table to use hostname instead of slug
+    // Update table to use hostname instead of slug and add new fields
     this.sql.exec(`
       CREATE TABLE IF NOT EXISTS analyses (
         hostname TEXT PRIMARY KEY,
@@ -1788,9 +2057,37 @@ export class CompetitorAnalysisDO extends DurableObject<Env> {
         updated_at TEXT NOT NULL,
         visits INTEGER NOT NULL DEFAULT 0,
         result TEXT,
-        error TEXT
+        error TEXT,
+        category TEXT,
+        business_description TEXT,
+        industry_sector TEXT,
+        keywords TEXT
       )
     `);
+
+    // Add new columns if they don't exist (for existing databases)
+    try {
+      this.sql.exec(`ALTER TABLE analyses ADD COLUMN category TEXT`);
+    } catch (e) {
+      // Column already exists, ignore
+    }
+    try {
+      this.sql.exec(
+        `ALTER TABLE analyses ADD COLUMN business_description TEXT`
+      );
+    } catch (e) {
+      // Column already exists, ignore
+    }
+    try {
+      this.sql.exec(`ALTER TABLE analyses ADD COLUMN industry_sector TEXT`);
+    } catch (e) {
+      // Column already exists, ignore
+    }
+    try {
+      this.sql.exec(`ALTER TABLE analyses ADD COLUMN keywords TEXT`);
+    } catch (e) {
+      // Column already exists, ignore
+    }
   }
 
   async createAnalysis(
@@ -1798,8 +2095,8 @@ export class CompetitorAnalysisDO extends DurableObject<Env> {
   ): Promise<void> {
     this.sql.exec(
       `
-      INSERT INTO analyses (hostname, company_domain, company_name, status, username, profile_image_url, created_at, updated_at, visits, result, error)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT OR REPLACE INTO analyses (hostname, company_domain, company_name, status, username, profile_image_url, created_at, updated_at, visits, result, error, category, business_description, industry_sector, keywords)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
       analysis.hostname,
       analysis.company_domain,
@@ -1811,55 +2108,45 @@ export class CompetitorAnalysisDO extends DurableObject<Env> {
       analysis.updated_at,
       analysis.visits || 0,
       analysis.result,
-      analysis.error
+      analysis.error,
+      analysis.category,
+      analysis.business_description,
+      analysis.industry_sector,
+      analysis.keywords
     );
   }
 
   async searchAnalyses(query: string): Promise<AnalysisRow[]> {
-    // Search by exact hostname match first
-    let results = this.sql.exec(
-      "SELECT * FROM analyses WHERE hostname = ? ORDER BY visits DESC, created_at DESC",
-      query
-    );
+    const lowerQuery = query.toLowerCase();
 
-    if (results.toArray().length > 0) {
-      return results.toArray() as AnalysisRow[];
-    }
-
-    // Search by company name (LIKE)
-    results = this.sql.exec(
+    // Search across multiple fields with partial matching
+    const results = this.sql.exec(
       `SELECT * FROM analyses 
-     WHERE company_name LIKE ? 
-     ORDER BY visits DESC, created_at DESC 
-     LIMIT 50`,
-      `%${query}%`
-    );
-
-    if (results.toArray().length > 0) {
-      return results.toArray() as AnalysisRow[];
-    }
-
-    // Search by domain (LIKE)
-    results = this.sql.exec(
-      `SELECT * FROM analyses 
-     WHERE company_domain LIKE ? 
-     ORDER BY visits DESC, created_at DESC 
-     LIMIT 50`,
-      `%${query}%`
-    );
-
-    if (results.toArray().length > 0) {
-      return results.toArray() as AnalysisRow[];
-    }
-
-    // Finally, search in result content for keywords (if result exists and contains the query)
-    results = this.sql.exec(
-      `SELECT * FROM analyses 
-     WHERE result IS NOT NULL 
-     AND result LIKE ? 
-     ORDER BY visits DESC, created_at DESC 
-     LIMIT 50`,
-      `%${query}%`
+       WHERE LOWER(hostname) LIKE ? 
+          OR LOWER(company_name) LIKE ?
+          OR LOWER(category) LIKE ?
+          OR LOWER(industry_sector) LIKE ?
+          OR LOWER(keywords) LIKE ?
+       ORDER BY 
+         CASE 
+           WHEN LOWER(hostname) = ? THEN 1
+           WHEN LOWER(company_name) = ? THEN 2
+           WHEN LOWER(hostname) LIKE ? THEN 3
+           WHEN LOWER(company_name) LIKE ? THEN 4
+           ELSE 5
+         END,
+         visits DESC, 
+         created_at DESC 
+       LIMIT 50`,
+      `%${lowerQuery}%`, // hostname LIKE
+      `%${lowerQuery}%`, // company_name LIKE
+      `%${lowerQuery}%`, // category LIKE
+      `%${lowerQuery}%`, // industry_sector LIKE
+      `%${lowerQuery}%`, // keywords LIKE
+      lowerQuery, // hostname exact match (for ordering)
+      lowerQuery, // company_name exact match (for ordering)
+      `${lowerQuery}%`, // hostname starts with (for ordering)
+      `${lowerQuery}%` // company_name starts with (for ordering)
     );
 
     return results.toArray() as AnalysisRow[];
@@ -1875,10 +2162,11 @@ export class CompetitorAnalysisDO extends DurableObject<Env> {
     );
     const total = (countResults.toArray()[0] as any).count;
 
-    // Get paginated data (excluding result column for efficiency)
+    // Get paginated data
     const results = this.sql.exec(
       `SELECT hostname, company_domain, company_name, status, username, 
-            profile_image_url, created_at, updated_at, visits, error, result
+            profile_image_url, created_at, updated_at, visits, error, result,
+            category, business_description, industry_sector, keywords
      FROM analyses 
      ORDER BY created_at DESC 
      LIMIT ? OFFSET ?`,
@@ -1891,6 +2179,7 @@ export class CompetitorAnalysisDO extends DurableObject<Env> {
       total,
     };
   }
+
   async getAnalysis(hostname: string): Promise<AnalysisRow | null> {
     const results = this.sql.exec(
       "SELECT * FROM analyses WHERE hostname = ?",
@@ -1930,6 +2219,55 @@ export class CompetitorAnalysisDO extends DurableObject<Env> {
       error,
       new Date().toISOString(),
       hostname
+    );
+  }
+
+  async updateAnalysisResultWithData(
+    hostname: string,
+    result: string | null,
+    error: string | null,
+    data: {
+      company_name?: string | null;
+      category?: string | null;
+      business_description?: string | null;
+      industry_sector?: string | null;
+      keywords?: string | null;
+    }
+  ): Promise<void> {
+    const status = "done"; // Both success and error are considered "done"
+
+    // Build the update query dynamically
+    const fields = ["status", "result", "error", "updated_at"];
+    const values = [status, result, error, new Date().toISOString()];
+
+    // Add the data fields if they exist
+    if (data.company_name !== undefined) {
+      fields.push("company_name");
+      values.push(data.company_name);
+    }
+    if (data.category !== undefined) {
+      fields.push("category");
+      values.push(data.category);
+    }
+    if (data.business_description !== undefined) {
+      fields.push("business_description");
+      values.push(data.business_description);
+    }
+    if (data.industry_sector !== undefined) {
+      fields.push("industry_sector");
+      values.push(data.industry_sector);
+    }
+    if (data.keywords !== undefined) {
+      fields.push("keywords");
+      values.push(data.keywords);
+    }
+
+    const setClause = fields.map((field) => `${field} = ?`).join(", ");
+    values.push(hostname); // for WHERE clause
+
+    this.sql.exec(
+      `UPDATE analyses SET ${setClause} WHERE hostname = ?`,
+      ...values
     );
   }
 

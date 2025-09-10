@@ -198,13 +198,69 @@
             margin: 0 auto 16px;
         }
 
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            padding: 8px 12px;
+            border: 2px solid #e8e6e1;
+            border-radius: 3px;
+            font-size: 12px;
+            background: white;
+            width: 200px;
+            margin-right: 8px;
+            transition: border-color 0.2s ease;
+            font-family: 'FT System Mono', monospace;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--signal);
+        }
+
+        .search-btn {
+            background: var(--signal);
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            transition: opacity 0.2s ease;
+            font-family: 'FT System Mono', monospace;
+        }
+
+        .search-btn:hover {
+            opacity: 0.8;
+        }
+
         @media (max-width: 768px) {
             .content-wrapper {
                 padding: 0 16px;
             }
 
+            .search-input {
+                width: 150px;
+            }
+
             body {
                 font-size: 13px;
+            }
+
+            .header-nav {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .search-form {
+                order: -1;
+                margin-bottom: 8px;
             }
         }
     </style>
@@ -220,7 +276,14 @@
                     Competitor Analysis
                 </h1>
             </div>
-            <p class="text-gray-600 text-sm uppercase tracking-wide">AI-powered market research</p>
+            <div class="header-nav flex items-center space-x-4">
+                <form class="search-form" onsubmit="performSearch(event)">
+                    <input type="text" class="search-input" placeholder="Search categories, keywords..."
+                        id="search-query">
+                    <button type="submit" class="search-btn">Search</button>
+                </form>
+                <p class="text-gray-600 text-sm uppercase tracking-wide">AI-powered market research</p>
+            </div>
         </div>
     </header>
 
@@ -255,7 +318,7 @@
                 </button>
             </div>
 
-            <p class="text-sm text-gray-500 uppercase tracking-wide">New users get 5 free analyses</p>
+            <p class="text-sm text-gray-500 uppercase tracking-wide">New users get 1 free analysis</p>
         </div>
     </section>
 
@@ -431,6 +494,15 @@
             } else {
                 btnText.classList.remove('hidden');
                 btnLoading.classList.add('hidden');
+            }
+        }
+
+        // Search function
+        function performSearch(event) {
+            event.preventDefault();
+            const query = document.getElementById('search-query').value.trim();
+            if (query) {
+                window.location.href = `/search/${encodeURIComponent(query)}`;
             }
         }
 

@@ -126,19 +126,19 @@ We can't do this endlessly though so there will be weak links that have no compe
 ✅ To improve DX, add logic to say it's old and needs to be refreshed if we have a new version!
 ✅ rerun some.
 
-## Add LLM validation logic
-
-- `company_fits_criteria:false` must result in error such that it's excluded from results.
-
 ## Categorization, taxonomization, and keywords
 
 - ✅ Add categorization (enum "category" field with up to 15 high level categories)
 - ✅ add `keywords` to schema
-- `worker.ts`: new endpoint `GET /search/%s` on category (exact) or on keywords using LIKE query (%s,) or on hostname, or on name (like). This must return a simple HTML with the search results.
-- On `results.html`, render category and keywords, and allow clicking on these
-- On `index.html`, render small search area in the header navigating to
+- ✅ `worker.ts`: new endpoint `GET /search/%s` on category (exact) or on keywords using LIKE query (%s,) or on hostname, or on name (like). This must return a simple HTML with the search results, navigatable to `/analysis/{hostname}`
+- ✅ `worker.ts`: new endpoint `GET /dump` which returns a JSON with all items in an array, but each item is all columns in the table except result, result's json is parsed and the following are added to the item: run, output.basis (property:basis) and output.content (spread onto item)
+- ✅ On `results.html`, render category and keywords, and allow clicking on these
+- ✅ On `index.html`, render small search area in the header navigating to
 
-## Search
+## Add LLM validation logic
+
+- ✅ `company_fits_criteria:false` must result in error such that it's excluded from results.
+- ✅ improve search by not going through result with LIKE but instead add stuff from result as columns and use that
 
 ## Tabularize
 

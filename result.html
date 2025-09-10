@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Competitor Analysis Report</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <style>
@@ -346,6 +347,179 @@
             color: #374151;
         }
 
+        .content-markdown {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #374151;
+        }
+
+        .content-markdown h1,
+        .content-markdown h2,
+        .content-markdown h3,
+        .content-markdown h4,
+        .content-markdown h5,
+        .content-markdown h6 {
+            font-family: 'Gerstner Programm', serif;
+            font-weight: 500;
+            color: var(--index-black);
+            margin: 1.5em 0 0.5em 0;
+        }
+
+        .content-markdown h1 {
+            font-size: 1.5em;
+        }
+
+        .content-markdown h2 {
+            font-size: 1.3em;
+        }
+
+        .content-markdown h3 {
+            font-size: 1.1em;
+        }
+
+        .content-markdown p {
+            margin: 1em 0;
+        }
+
+        .content-markdown ul,
+        .content-markdown ol {
+            margin: 1em 0;
+            padding-left: 2em;
+        }
+
+        .content-markdown li {
+            margin: 0.5em 0;
+        }
+
+        .content-markdown strong {
+            font-weight: 600;
+            color: var(--index-black);
+        }
+
+        .content-markdown em {
+            font-style: italic;
+        }
+
+        .content-markdown code {
+            background: #f3f4f6;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'FT System Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content-markdown pre {
+            background: #f8f8f6;
+            border: 1px solid #e8e6e1;
+            border-radius: 4px;
+            padding: 1em;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+
+        .content-markdown pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .content-markdown table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5em 0;
+            background: white;
+            border: 2px solid #e8e6e1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .content-markdown th,
+        .content-markdown td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e8e6e1;
+        }
+
+        .content-markdown th {
+            background: #f8f8f6;
+            font-weight: 600;
+            color: var(--index-black);
+            font-family: 'Gerstner Programm', serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 11px;
+        }
+
+        .content-markdown tr:last-child td {
+            border-bottom: none;
+        }
+
+        .content-markdown tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .content-markdown blockquote {
+            border-left: 4px solid var(--neural);
+            background: #f8f8f6;
+            padding: 1em 1.5em;
+            margin: 1.5em 0;
+            font-style: italic;
+        }
+
+        /* Ensure lists have proper display and spacing */
+        .content-markdown ul,
+        .content-markdown ol {
+            display: block;
+            margin: 1em 0;
+            padding-left: 2em;
+            list-style-position: outside;
+        }
+
+        .content-markdown ul {
+            list-style-type: disc;
+        }
+
+        .content-markdown ol {
+            list-style-type: decimal;
+        }
+
+        .content-markdown li {
+            display: list-item;
+            margin: 0.5em 0;
+            line-height: 1.6;
+        }
+
+        /* Nested lists */
+        .content-markdown ul ul,
+        .content-markdown ol ul {
+            list-style-type: circle;
+            margin: 0.25em 0;
+        }
+
+        .content-markdown ul ul ul,
+        .content-markdown ol ul ul {
+            list-style-type: square;
+        }
+
+        .content-markdown ol ol,
+        .content-markdown ul ol {
+            list-style-type: lower-alpha;
+            margin: 0.25em 0;
+        }
+
+        /* Ensure list markers are visible */
+        .content-markdown ul li::marker,
+        .content-markdown ol li::marker {
+            color: var(--index-black);
+        }
+
+        /* Fix any potential conflicts with other styles */
+        .content-markdown ul li,
+        .content-markdown ol li {
+            text-indent: 0;
+            margin-left: 0;
+            padding-left: 0;
+        }
+
         .field-title {
             font-size: 16px;
             font-weight: 500;
@@ -450,6 +624,107 @@
             text-decoration: underline;
         }
 
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            padding: 8px 12px;
+            border: 2px solid #e8e6e1;
+            border-radius: 3px;
+            font-size: 12px;
+            background: white;
+            width: 200px;
+            margin-right: 8px;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--signal);
+        }
+
+        .search-btn {
+            background: var(--signal);
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            transition: opacity 0.2s ease;
+        }
+
+        .search-btn:hover {
+            opacity: 0.8;
+        }
+
+        .clickable-tag {
+            display: inline-block;
+            background: white;
+            border: 2px solid var(--neural);
+            padding: 4px 8px;
+            margin: 2px 4px 2px 0;
+            border-radius: 3px;
+            color: var(--index-black);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .clickable-tag:hover {
+            border-color: var(--signal);
+            color: var(--signal);
+        }
+
+        .category-tag {
+            background: #f0f9f4;
+            border-color: #22c55e;
+            color: #166534;
+        }
+
+        .category-tag:hover {
+            background: #dcfce7;
+            border-color: #16a34a;
+            color: #14532d;
+        }
+
+        .sentiment-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 12px;
+            border: 1px solid;
+        }
+
+        .sentiment-high {
+            background: #f0f9f4;
+            color: #166534;
+            border-color: #22c55e;
+        }
+
+        .sentiment-medium {
+            background: #fffbeb;
+            color: #92400e;
+            border-color: #f59e0b;
+        }
+
+        .sentiment-low {
+            background: #fef2f2;
+            color: #991b1b;
+            border-color: #ef4444;
+        }
+
         @media (max-width: 768px) {
             .content-wrapper {
                 padding: 0 16px;
@@ -498,6 +773,19 @@
                 padding: 14px 24px;
                 font-size: 12px;
             }
+
+            .search-input {
+                width: 150px;
+            }
+
+            .content-markdown table {
+                font-size: 12px;
+            }
+
+            .content-markdown th,
+            .content-markdown td {
+                padding: 8px 12px;
+            }
         }
 
         .error-icon,
@@ -541,9 +829,16 @@
                     Competitor Analysis
                 </a>
             </div>
-            <a href="/" class="text-gray-600 hover:text-gray-800 font-medium text-sm uppercase tracking-wide">
-                Back to analyses
-            </a>
+            <div class="flex items-center space-x-4">
+                <form class="search-form" onsubmit="performSearch(event)">
+                    <input type="text" class="search-input" placeholder="Search categories, keywords..."
+                        id="search-query">
+                    <button type="submit" class="search-btn">Search</button>
+                </form>
+                <a href="/" class="text-gray-600 hover:text-gray-800 font-medium text-sm uppercase tracking-wide">
+                    Back to analyses
+                </a>
+            </div>
         </div>
     </header>
 
@@ -628,9 +923,23 @@
                             <p class="text-gray-600 mb-2 font-mono text-sm" id="company-domain">
                                 <!-- Domain will be injected -->
                             </p>
-                            <p class="text-gray-500 mb-6 text-xs uppercase tracking-wide" id="company-location">
+                            <p class="text-gray-500 mb-4 text-xs uppercase tracking-wide" id="company-location">
                                 <!-- Location will be injected -->
                             </p>
+                            <div class="mb-4">
+                                <div class="mb-2">
+                                    <span class="text-gray-500 text-xs uppercase tracking-wide mr-2">Category:</span>
+                                    <span id="company-category-tag">
+                                        <!-- Category will be injected -->
+                                    </span>
+                                </div>
+                                <div class="mb-4">
+                                    <span class="text-gray-500 text-xs uppercase tracking-wide mr-2">Keywords:</span>
+                                    <div id="company-keywords" class="inline">
+                                        <!-- Keywords will be injected -->
+                                    </div>
+                                </div>
+                            </div>
                             <div class="flex items-center space-x-4">
                                 <a href="#" id="linkedin-link"
                                     class="text-signal hover:underline font-medium text-xs uppercase tracking-wide hidden"
@@ -693,6 +1002,31 @@
                     </div>
                 </section>
 
+                <!-- Financial Analysis -->
+                <section class="section-spacing">
+                    <h2 class="gerstner section-title">Financial Overview</h2>
+
+                    <!-- Investment Summary -->
+                    <div class="analysis-card" id="investment-summary-card">
+                        <!-- Investment summary will be injected -->
+                    </div>
+                </section>
+
+                <!-- Product Analysis -->
+                <section class="section-spacing">
+                    <h2 class="gerstner section-title">Product & Pricing Analysis</h2>
+
+                    <!-- Products Summary -->
+                    <div class="analysis-card" id="products-summary-card">
+                        <!-- Products summary will be injected -->
+                    </div>
+
+                    <!-- Pricing Summary -->
+                    <div class="analysis-card" id="pricing-summary-card">
+                        <!-- Pricing summary will be injected -->
+                    </div>
+                </section>
+
                 <!-- Market Analysis -->
                 <section class="section-spacing">
                     <h2 class="gerstner section-title">Understand the Market</h2>
@@ -731,7 +1065,7 @@
                             Perfect for AI agents and automated analysis. Get the complete competitor analysis
                             in structured markdown format with full context for all analyzed competitors.
                         </p>
-                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <div class="flex flex-col gap-4 justify-center">
                             <a href="#" id="markdown-link" class="secondary-btn" target="_blank">
                                 <svg class="icon-terminal" fill="currentColor" viewBox="0 0 24 24">
                                     <path
@@ -768,7 +1102,7 @@
         <div class="content-wrapper flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 <span class="text-gray-600 text-xs uppercase tracking-wide">Powered by Parallel AI</span>
-                <a href="https://github.com/janwilmake/competitor-analysis" target="_blank"
+                <a href="https://github.com/parallel-web/competitive-analysis-demo" target="_blank"
                     class="text-signal hover:text-orange-600 underline text-xs">
                     GitHub
                 </a>
@@ -784,14 +1118,17 @@
         const data = window.data;
         const analysis = data.analysis;
 
-        // Helper function to convert newlines to HTML
+        // Helper function to convert markdown to HTML using marked
         function convertMarkdown(text) {
             if (!text) return '';
 
-            return text
-                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')  // **bold** -> <strong>
-                .replace(/\*(.+?)\*/g, '<em>$1</em>')              // *italic* -> <em>
-                .replace(/\n/g, '<br>');                           // newlines -> <br>
+            // Configure marked for tables and other features
+            marked.setOptions({
+                breaks: true,
+                gfm: true
+            });
+
+            return marked.parse(text);
         }
 
         // Helper function to get basis for a field
@@ -824,7 +1161,7 @@
                     <h3 class="field-title gerstner">${title}</h3>
                     ${basis ? '<button class="expand-toggle" onclick="toggleDetails(this)">Details</button>' : ''}
                 </div>
-                <div class="content-text">${convertMarkdown(content)}</div>
+                <div class="content-markdown">${convertMarkdown(content)}</div>
                 ${basis && !basis.expanded ? createSourcesLine(basis) : ''}
                 ${basis ? `
                     <div class="collapsible-content">
@@ -832,8 +1169,8 @@
                         ${basis.reasoning ? `
                             <div class="reasoning-section">
                                 <h4 class="font-semibold mb-2 text-xs uppercase tracking-wide">AI Reasoning</h4>
-                                <p class="text-gray-600">${convertMarkdown(basis.reasoning)}</p>
-                                <p class="text-gray-600">${basis.confidence ? `<div class="mt-4">Confidence: ${basis.confidence}</div>` : ''}</p>
+                                <div class="text-gray-600">${convertMarkdown(basis.reasoning)}</div>
+                                ${basis.confidence ? `<div class="mt-4">Confidence: ${basis.confidence}</div>` : ''}
                             </div>
                         ` : ''}
                         ${basis.citations && basis.citations.length > 0 ? `
@@ -908,6 +1245,19 @@
             return competitorLink;
         }
 
+        // Search function
+        function performSearch(event) {
+            event.preventDefault();
+            const query = document.getElementById('search-query').value.trim();
+            if (query) {
+                window.location.href = `/search/${encodeURIComponent(query)}`;
+            }
+        }
+
+        // Make functions globally available
+        window.toggleDetails = toggleDetails;
+        window.performSearch = performSearch;
+
         // Toggle details function
         function toggleDetails(button) {
             const card = button.closest('.analysis-card');
@@ -930,9 +1280,6 @@
                 }
             }
         }
-
-        // Make toggleDetails globally available
-        window.toggleDetails = toggleDetails;
 
         // Show old analysis banner if needed
         if (data.isOld && analysis.status === 'done' && !analysis.error) {
@@ -1005,6 +1352,26 @@
             document.getElementById('company-domain').textContent = result.company_domain || '';
             document.getElementById('company-location').textContent = result.headquarters_location || '';
 
+            // Populate category
+            const categoryTag = document.getElementById('company-category-tag');
+            if (result.category) {
+                categoryTag.innerHTML = `<a href="/search/${encodeURIComponent(result.category)}" class="clickable-tag category-tag">${result.category}</a>`;
+            } else {
+                categoryTag.textContent = 'Unknown';
+                categoryTag.href = '#';
+            }
+
+            // Populate keywords
+            const keywordsContainer = document.getElementById('company-keywords');
+            if (result.keywords) {
+                const keywords = result.keywords.split(',').map(k => k.trim()).filter(k => k);
+                keywordsContainer.innerHTML = keywords.map(keyword =>
+                    `<a href="/search/${encodeURIComponent(keyword)}" class="clickable-tag">${keyword}</a>`
+                ).join('');
+            } else {
+                keywordsContainer.innerHTML = '<span class="text-gray-500 text-xs">No keywords available</span>';
+            }
+
             // LinkedIn link
             const linkedinLink = document.getElementById('linkedin-link');
             if (result.linkedin_url && result.linkedin_url !== 'Not found') {
@@ -1041,15 +1408,40 @@
                 'Unique Value Proposition'
             );
 
-            // Populate Reddit analysis (moved under Company Overview)
+            // Populate Reddit analysis with sentiment indicator
+            const sentimentClass = result.reddit_overall_sentiment === 'high' ? 'sentiment-high' :
+                result.reddit_overall_sentiment === 'medium' ? 'sentiment-medium' :
+                    result.reddit_overall_sentiment === 'low' ? 'sentiment-low' : '';
+
             const sentimentText = result.reddit_overall_sentiment ?
-                `Reddit Sentiment: ${result.reddit_overall_sentiment.charAt(0).toUpperCase() + result.reddit_overall_sentiment.slice(1)}` :
-                'Reddit Sentiment';
+                `Reddit Analysis <span class="sentiment-indicator ${sentimentClass}">${result.reddit_overall_sentiment} sentiment</span>` :
+                'Reddit Analysis';
 
             document.getElementById('reddit-analysis-card').innerHTML = createAnalysisCard(
                 result.target_company_reddit_analysis || 'No Reddit analysis available',
                 'target_company_reddit_analysis',
                 sentimentText
+            );
+
+            // Populate investment summary
+            document.getElementById('investment-summary-card').innerHTML = createAnalysisCard(
+                result.investment_summary || 'No investment summary available',
+                'investment_summary',
+                'Investment Summary'
+            );
+
+            // Populate products summary
+            document.getElementById('products-summary-card').innerHTML = createAnalysisCard(
+                result.products_summary || 'No products summary available',
+                'products_summary',
+                'Products & Features'
+            );
+
+            // Populate pricing summary
+            document.getElementById('pricing-summary-card').innerHTML = createAnalysisCard(
+                result.pricing_summary || 'No pricing summary available',
+                'pricing_summary',
+                'Pricing Strategy'
             );
 
             // Populate target market analysis
