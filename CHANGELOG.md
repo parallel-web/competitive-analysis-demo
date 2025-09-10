@@ -112,7 +112,7 @@ We can't do this endlessly though so there will be weak links that have no compe
 - Make the header for Investments "Investment Story"
 - Make the header for features "Feature Comparison"
 
-# ✅ Improve the spec:
+# ✅ Improve the spec
 
 - `competitors` now only has name and website, rather, it should have: name, hostname (without www, prioritize .com if available), and a short 1 sentence description of what the competitor does.
 - `investment_summary:string`: summarize every funding round and each investor in a bulleted format.

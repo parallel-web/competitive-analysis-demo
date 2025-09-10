@@ -1,8 +1,8 @@
-# competitor analysis - ai market research
+# Parallel.ai Competitive Analysis Demo
 
-intelligent competitive analysis tool. researches companies, finds competitors, mines reddit for user insights.
+This is an intelligent competitive analysis tool that researches companies, finds competitors, mines reddit for user insights, and allows viewing and sharing complete reports publicly.
 
-## features
+## Features
 
 - ai company research
 - competitor identification - 4-6 direct/indirect competitors
@@ -10,33 +10,20 @@ intelligent competitive analysis tool. researches companies, finds competitors, 
 - seo-optimized shareable reports
 - x/twitter auth with usage limits
 
-## tech stack
+## Tech stack
 
 - cloudflare workers + durable objects
 - parallel task api with reddit mcp
 - simplerauth x/twitter login
 - html/css/js + tailwind
 
-## api
+## Setup
 
-- `GET /` - homepage
-- `GET /new?company=domain.com` - create analysis
-- `GET /analysis/{slug}` - view results
-- `POST /webhook` - task completion
+You need [wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/) and a Cloudflare account to host this. Also
 
-## setup
+First, clone the repo and configure `wrangler.json` in a way that works for you (need to remove account_id and change or remove routes).
 
 ```bash
-git clone <repo>
 npm install
-cp .env.example .env
-npm run deploy
+wrangler deploy
 ```
-
-## limits
-
-- 5 free analyses per user
-- up to 10 minutes processing
-- results cached and public
-
-inspired by exa's company researcher but focused on competitive analysis with reddit insights.
