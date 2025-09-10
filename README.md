@@ -24,7 +24,7 @@ Check the live website: https://competitive-analysis-demo.parallel.ai
 
 ## Setup
 
-You need [wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/) and a Cloudflare account to host this. Also
+You need [wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/) and a Cloudflare account to host this.
 
 First, clone the repo and configure `wrangler.json` in a way that works for you (need to remove account_id and change or remove routes).
 
