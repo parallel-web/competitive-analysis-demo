@@ -154,6 +154,7 @@ We can't do this endlessly though so there will be weak links that have no compe
 - Try get reddit client-id/secret and api key
 - Fonts/assets must be hosted here, not assets.p0web.com. Ensure they preload.
 - I think we should have a section in the blog for future improvement considerations or use-cases/opportunities, and maybe talk a bit about the business model or how creating public data could be an added value to existing businesses' customers, to inspire people to build with this. Also, the OSS README should be designed to get people to self host this in 5 minutes and easily change the task.schema.json to experiment and try different usecases. We should put a call to action since that's our goal: make people succeed in this use-case of Parallel. Also talk about other private data MCPs that could have high leverage here. (edited)
+- Add logo Parallel
 
 # BACKLOG
 
@@ -161,3 +162,4 @@ We can't do this endlessly though so there will be weak links that have no compe
 - Figure out what to do with 'low confidence' outputs. Can we just hide it and assume the data is correct? A lot of fields have low confidence
 - Determine if we should implement some sort of a retry mechanism if tasks have bad outputs, and what do we show the user if certain competitor analysis cannot be completed?
 - Adding SSE? (especially useful for seeing which MCPs were used and how that went). Determine how to add it: add extra data storage (more work), or only have SSE endpoint for user at the moment of viewing loading page?
+- Host X Login at login.competitive-analysis-demo.parallel.ai (with Parallel owned X OAuth Client)

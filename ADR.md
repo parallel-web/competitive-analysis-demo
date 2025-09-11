@@ -1,0 +1,15 @@
+- highlight the public nature of the results more. This design choice allows more people to enjoy the same piece of AI inference, resulting in more value per GPU hour.
+- Highlight more that HTML was deliberatly chosen as frontend language:
+  - incentivizes developer to reduce amount of complex interactions because it creates difficult javascript
+  - improves UX because staticly generated pages that load immediately are preferable and complex interactions may confuse users.
+  - improves understanding an entire layer of complexity (of compilation from React to HTML,JS,CSS).
+  - improves accessibility for AI as complex interactions may be harder to read programmatically which could hide crucial information.
+  - Makes debugging easier and code much easier to read because there is less abstraction.
+- Highlight design decision of required oauth with N free generations per user, leveraging X user registration as a bot protection mechanism.
+- a significant piece here is turning the company and all its competitors in one markdown of ±15k tokens which is extremely token-dense info useful for further competitive analysis with your LLM. The MCP exposes this context as a tool. From prior art I discovered this pattern is extremely powerful and we could write about that.
+- design decision to incentivize the user to come back after 30 minutes, which reduces unease of waiting. Aligns with Parags vision of making the highest-quality, slowest AI (i've heard him say that in some interview, I think). Allowing user to leave is useful for this. Not showing intermediate steps or loading of fields reduces complexity too while also improving UX (imho).
+- We slightly go over 25 fields. We have 30 right now to stay within a single task which balances quality and simplicity.
+- queryable-object is not an ORM, we still use SQL queries. Queryable object's main usecase here is providing an admin panel functionality and migration tooling. There are some hallucinations in your code samples.
+- the output fields were put into result but some were put into columns to enable search functionality.
+- we use isDeep for preventing infinite recursion.
+- LLM filter property `company_fits_criteria` is very useful for quality control
