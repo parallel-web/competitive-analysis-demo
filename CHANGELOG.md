@@ -112,7 +112,7 @@ We can't do this endlessly though so there will be weak links that have no compe
 - Make the header for Investments "Investment Story"
 - Make the header for features "Feature Comparison"
 
-# ✅ Improve the spec
+## ✅ Improve the spec
 
 - `competitors` now only has name and website, rather, it should have: name, hostname (without www, prioritize .com if available), and a short 1 sentence description of what the competitor does.
 - `investment_summary:string`: summarize every funding round and each investor in a bulleted format.
@@ -121,7 +121,7 @@ We can't do this endlessly though so there will be weak links that have no compe
 - Adjust the TAM description -- the system seems to be looking for TAM informationr eported by each company, instead, we should ask the system to externally research TAM. First, identify the company's market, then, for that market, do extra research to describe the TAM
 - `recent_news_developments` for a bullet list of recent news & development, with a date, description and heading for each.
 
-# Improvements
+## Improvements
 
 ✅ To improve DX, add logic to say it's old and needs to be refreshed if we have a new version!
 ✅ rerun some.
@@ -140,17 +140,24 @@ We can't do this endlessly though so there will be weak links that have no compe
 - ✅ `company_fits_criteria:false` must result in error such that it's excluded from results.
 - ✅ improve search by not going through result with LIKE but instead add stuff from result as columns and use that
 
-## Tabularize
+## host
 
-Although this is less important for now, if I got more time, get the key company datapoints into the SQLite schema format. Also, use '@Queryable()' and allow anyone full readonly data access, also over MCP.
+- ✅ Host `parallel-web/competitive-analysis-demo` on parallel account on https://competitive-analysis-demo.parallel.ai
+
+## Improvements this week (friday afternoon)
+
+- Add requirement that competitors must have their own (sub)domain in order for them to be listable. Description may describe which specific product is competing.
+- Add outlink to website for each competitor.
+- changing `market_opportunities` to `competitor_reddit_summary`: `Create a detailed analysis of how the target company's competitors present themselves on Reddit. In particular, identify the competitor(s) with the highest presence on Reddit, a sample of positive quotes regarding competitors and a sample of negative quotes regarding competitors. Give an overview of what Redditors like and dislike about competitive products.`
+- My deps require MIT license.
+- Add 'powered by paralel ultra8x' and show that MCP was used.
+- Try get reddit client-id/secret and api key
+- Fonts/assets must be hosted here, not assets.p0web.com. Ensure they preload.
+- I think we should have a section in the blog for future improvement considerations or use-cases/opportunities, and maybe talk a bit about the business model or how creating public data could be an added value to existing businesses' customers, to inspire people to build with this. Also, the OSS README should be designed to get people to self host this in 5 minutes and easily change the task.schema.json to experiment and try different usecases. We should put a call to action since that's our goal: make people succeed in this use-case of Parallel. Also talk about other private data MCPs that could have high leverage here. (edited)
 
 # BACKLOG
 
-Do more to improve data quality:
-
+- Although this is less important for now, if I got more time, get the key company datapoints into the SQLite schema format. Also, use '@Queryable()' and allow anyone full readonly data access, also over MCP.
 - Figure out what to do with 'low confidence' outputs. Can we just hide it and assume the data is correct? A lot of fields have low confidence
 - Determine if we should implement some sort of a retry mechanism if tasks have bad outputs, and what do we show the user if certain competitor analysis cannot be completed?
-
-Other larger potential improvements:
-
 - Adding SSE? (especially useful for seeing which MCPs were used and how that went). Determine how to add it: add extra data storage (more work), or only have SSE endpoint for user at the moment of viewing loading page?
