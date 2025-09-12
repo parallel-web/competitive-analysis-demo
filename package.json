@@ -5,7 +5,7 @@
   "main": "worker.ts",
   "dependencies": {
     "parallel-web": "^0.1.0",
-    "queryable-object": "^0.0.20",
+    "queryable-object": "^0.0.21",
     "simplerauth-client": "^0.0.14",
     "with-mcp": "^0.0.14"
   },

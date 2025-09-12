@@ -32,3 +32,12 @@ First, clone the repo and configure `wrangler.json` in a way that works for you 
 npm install
 wrangler deploy
 ```
+
+## Working with production data locally
+
+To easily get data into your app, run some analyses after deploying.
+
+If you want to have the same data locally, you can export/import through the admin panel:
+
+1. visit https://yourdomain.com/admin and export your table as JSON
+2. visit http://localhost:8787/admin?page=import and import that file as table `analyses`
