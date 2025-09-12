@@ -1641,8 +1641,6 @@ async function handleSearch(
                 position: relative;
                 width: 48px;
                 height: 48px;
-                background: url('/dark-parallel-symbol-270.svg') no-repeat center;
-                background-size: contain;
             }
             .search-input {
                 width: 100%;
