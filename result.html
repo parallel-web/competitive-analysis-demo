@@ -280,7 +280,10 @@
         }
 
         .collapsible-content.expanded {
-            max-height: 2000px;
+            /* Much higher limit */
+            max-height: 10000px;
+            /* Slightly longer transition for smoother effect */
+            transition: max-height 0.5s ease;
         }
 
         .stats-grid {
