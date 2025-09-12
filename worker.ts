@@ -419,8 +419,8 @@ function createDefaultOgSvg(hostname: string): string {
   return `<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <style>
-        @import url('https://assets.p0web.com/Gerstner-ProgrammMedium.woff2');
-        @import url('https://assets.p0web.com/FTSystemMono-Medium.woff2');
+        @import url('/Gerstner-ProgrammMedium.woff2');
+        @import url('/FTSystemMono-Medium.woff2');
         .gerstner { font-family: 'Gerstner Programm', system-ui, sans-serif; }
         .ft-mono { font-family: 'FT System Mono', monospace; }
       </style>
@@ -507,8 +507,8 @@ function createCompetitorAnalysisOgSvg(
   return `<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <style>
-        @import url('https://assets.p0web.com/Gerstner-ProgrammMedium.woff2');
-        @import url('https://assets.p0web.com/FTSystemMono-Medium.woff2');
+        @import url('/Gerstner-ProgrammMedium.woff2');
+        @import url('/FTSystemMono-Medium.woff2');
         .gerstner { font-family: 'Gerstner Programm', system-ui, sans-serif; }
         .ft-mono { font-family: 'FT System Mono', monospace; }
       </style>
@@ -1549,28 +1549,45 @@ async function handleSearch(
           query
         )} - Competitor Analysis</title>
         <script src="https://cdn.tailwindcss.com"></script>
+            <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="//www.google.com">
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com">
+    <!-- Performance optimization -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+
+    <!-- Preload critical fonts -->
+    <link rel="preload" href="/FTSystemMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/FTSystemMono-Medium.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/FTSystemMono-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/Gerstner-ProgrammRegular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/Gerstner-ProgrammMedium.woff2" as="font" type="font/woff2" crossorigin>
+
+    <!-- Preload logo SVG -->
+    <link rel="preload" href="/dark-parallel-symbol-270.svg" as="image" type="image/svg+xml">
+
         <style>
             @font-face {
                 font-family: 'FT System Mono';
-                src: url('https://assets.p0web.com/FTSystemMono-Regular.woff2') format('woff2');
+                src: url('/FTSystemMono-Regular.woff2') format('woff2');
                 font-weight: 400;
                 font-display: swap;
             }
             @font-face {
                 font-family: 'FT System Mono';
-                src: url('https://assets.p0web.com/FTSystemMono-Medium.woff2') format('woff2');
+                src: url('/FTSystemMono-Medium.woff2') format('woff2');
                 font-weight: 500;
                 font-display: swap;
             }
             @font-face {
                 font-family: 'Gerstner Programm';
-                src: url('https://assets.p0web.com/Gerstner-ProgrammRegular.woff2') format('woff2');
+                src: url('/Gerstner-ProgrammRegular.woff2') format('woff2');
                 font-weight: 400;
                 font-display: swap;
             }
             @font-face {
                 font-family: 'Gerstner Programm';
-                src: url('https://assets.p0web.com/Gerstner-ProgrammMedium.woff2') format('woff2');
+                src: url('/Gerstner-ProgrammMedium.woff2') format('woff2');
                 font-weight: 500;
                 font-display: swap;
             }

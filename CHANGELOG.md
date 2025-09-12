@@ -160,7 +160,6 @@ Schema
 - ✅ Add 'Powered by Paralel ultra8x' and show that MCP was used on reddit properties
 - ✅ Fonts/assets must be hosted here, not assets.p0web.com.
 - ✅ Add logo Parallel
-- Ensure assets preload.
 
 Other
 
