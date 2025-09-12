@@ -1070,6 +1070,26 @@
 
                 </section>
 
+                <!-- Competitors Analysis -->
+                <section class="section-spacing">
+                    <h2 class="gerstner section-title">Competitive Landscape</h2>
+                    <div class="analysis-card" id="competitive-landscape-card">
+                        <!-- Competitive landscape overview will be injected -->
+                    </div>
+
+                    <!-- Competitor Reddit Summary -->
+                    <div class="analysis-card" id="competitor-reddit-summary-card">
+                        <!-- Competitor Reddit summary will be injected here -->
+                    </div>
+
+                    <div id="competitors-container">
+                        <!-- Individual competitors will be injected here -->
+                    </div>
+
+
+
+                </section>
+
                 <!-- Financial Analysis -->
                 <section class="section-spacing">
                     <h2 class="gerstner section-title">Financial Overview</h2>
@@ -1112,22 +1132,7 @@
                     </div>
                 </section>
 
-                <!-- Competitors Analysis -->
-                <section class="section-spacing">
-                    <h2 class="gerstner section-title">Competitive Landscape</h2>
-                    <div class="analysis-card" id="competitive-landscape-card">
-                        <!-- Competitive landscape overview will be injected -->
-                    </div>
-                    <div id="competitors-container">
-                        <!-- Individual competitors will be injected here -->
-                    </div>
 
-                    <!-- Competitor Reddit Summary -->
-                    <div class="analysis-card" id="competitor-reddit-summary-card">
-                        <!-- Competitor Reddit summary will be injected here -->
-                    </div>
-
-                </section>
 
                 <!-- Agent-Friendly Section -->
                 <div class="agent-section">
@@ -1257,7 +1262,7 @@
                                             ${citation.excerpts && citation.excerpts.length > 0 ? `
                                                 <div class="mt-2">
                                                     ${citation.excerpts.map(excerpt => `
-                                                        <div class="excerpt-text">"${convertMarkdown(excerpt)}"</div>
+                                                        <div class="excerpt-text">${convertMarkdown(excerpt)}</div>
                                                     `).join('')}
                                                 </div>
                                             ` : ''}
