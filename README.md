@@ -1,6 +1,6 @@
 # **Building a Serverless Competitive Intelligence Platform with MCP \+ Task API**
 
-We built a full-stack competitive intelligence platform that automates company research, competitor discovery, and sentiment analysis. 
+We built a full-stack competitive intelligence platform that automates company research, competitor discovery, and sentiment analysis. View the complete app here: https://competitive-analysis-demo.parallel.ai/
 
 https://github.com/user-attachments/assets/e40770d3-9716-4fde-8116-f356bb6e35d0
 
