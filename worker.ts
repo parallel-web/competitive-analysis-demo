@@ -1047,9 +1047,13 @@ async function handleNew(
   const existingAnalysis = await do_stub.getAnalysis(hostname);
   if (existingAnalysis) {
     // Check if analysis is older than 14 days
-    if (isAnalysisOld(existingAnalysis.created_at) && !!ctx.authenticated) {
-      // Delete old analysis and create new one
-      await do_stub.deleteAnalysis(hostname);
+    if (isAnalysisOld(existingAnalysis.created_at)) {
+      if (!!ctx.authenticated) {
+        // Delete old analysis and create new one
+        await do_stub.deleteAnalysis(hostname);
+      } else {
+        // continue without deletion. should show login screen
+      }
     } else if (!!existingAnalysis.error) {
       // Delete old analysis and create new one
       await do_stub.deleteAnalysis(hostname);
@@ -1637,6 +1641,8 @@ async function handleSearch(
                 position: relative;
                 width: 48px;
                 height: 48px;
+                background: url('/dark-parallel-symbol-270.svg') no-repeat center;
+                background-size: contain;
             }
             .search-input {
                 width: 100%;
