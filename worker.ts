@@ -20,7 +20,7 @@ import resultHtml from "./result.html";
 const ANALYSIS_LIMIT = 5;
 const DO_NAME = "v5";
 const ADMIN_USERNAMES = ["janwilmake", "khushi_shelat"];
-const NEW_VERSION_DATE = 1757682596716;
+const NEW_VERSION_DATE = 1757678996716;
 
 export interface Env {
   COMPETITOR_ANALYSIS: DurableObjectNamespace<
