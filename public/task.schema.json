@@ -121,7 +121,7 @@
 
     "competitors": {
       "type": "array",
-      "description": "3-6 key direct competitors with detailed information",
+      "description": "3-6 key direct competitors with detailed information. Competitors must have their own (sub)domain in order for them to be listable (e.g. do not list github repos).",
       "items": {
         "type": "object",
         "required": ["name", "hostname", "description"],
@@ -133,11 +133,11 @@
           },
           "hostname": {
             "type": "string",
-            "description": "Competitor website hostname without www prefix, prioritize .com domains when available (format: hostname.com)"
+            "description": "Competitor website hostname without www prefix or pathname. Prioritize .com domains when available (format: hostname.com)"
           },
           "description": {
             "type": "string",
-            "description": "One sentence description of what this competitor does and their key differentiator"
+            "description": "One sentence description of the specific product/feature of this competitor that competes, and the key differentiator."
           }
         }
       }
@@ -147,27 +147,32 @@
       "type": "string",
       "description": "Create a detailed tabulated analysis of the company's key products/features and compare their availability across major competitors. Format as a comparison table showing which features/products are offered by the target company versus competitors."
     },
+
     "pricing_summary": {
       "type": "string",
       "description": "Comprehensive analysis of the company's current pricing model, tiers, and costs compared to competitors. Include specific pricing details, subscription models, freemium options, and competitive positioning analysis."
+    },
+
+    "competitor_reddit_summary": {
+      "type": "string",
+      "description": "Create a detailed analysis of how the target company's competitors present themselves on Reddit. In particular, identify the competitor(s) with the highest presence on Reddit, a sample of positive quotes regarding competitors and a sample of negative quotes regarding competitors. Give an overview of what Redditors like and dislike about competitive products."
     },
 
     "competitive_landscape_overview": {
       "type": "string",
       "description": "Short summary (1 paragraph) of the competitive landscape and market dynamics"
     },
+
     "target_company_reddit_analysis": {
       "type": "string",
       "description": "Comprehensive paragraph analysis of Reddit discussions specifically about the target company, including common themes, user experiences, comparisons to competitors, and insights from relevant subreddits."
     },
+
     "reddit_overall_sentiment": {
       "type": "string",
       "description": "Overall sentiment of the target company on Reddit: 'low', 'medium' or 'high'"
     },
-    "market_opportunities": {
-      "type": "string",
-      "description": "2-3 sentences analysis of underserved market segments, emerging trends, geographic expansion opportunities, or product/service gaps that represent growth opportunities for the target company."
-    },
+
     "executive_summary": {
       "type": "string",
       "description": "Short (1 paragraph) executive summary covering the company's current market position, key competitive dynamics, most significant opportunities and threats, and critical strategic implications. Written for senior leadership decision-making."

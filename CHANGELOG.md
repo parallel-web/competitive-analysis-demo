@@ -146,15 +146,27 @@ We can't do this endlessly though so there will be weak links that have no compe
 
 ## Improvements this week (friday afternoon)
 
-- Add requirement that competitors must have their own (sub)domain in order for them to be listable. Description may describe which specific product is competing.
-- Add outlink to website for each competitor.
-- changing `market_opportunities` to `competitor_reddit_summary`: `Create a detailed analysis of how the target company's competitors present themselves on Reddit. In particular, identify the competitor(s) with the highest presence on Reddit, a sample of positive quotes regarding competitors and a sample of negative quotes regarding competitors. Give an overview of what Redditors like and dislike about competitive products.`
-- My deps require MIT license.
-- Add 'powered by paralel ultra8x' and show that MCP was used.
+public results, html choice, oauth reason, markdown context engineering, come-back-later ux,
+
+Schema
+
+- ✅ Add requirement that competitors must have their own (sub)domain in order for them to be listable. Description may describe which specific product is competing.
+- ✅ changing `market_opportunities` to `competitor_reddit_summary`: `Create a detailed analysis of how the target company's competitors present themselves on Reddit. In particular, identify the competitor(s) with the highest presence on Reddit, a sample of positive quotes regarding competitors and a sample of negative quotes regarding competitors. Give an overview of what Redditors like and dislike about competitive products.`
+
+`index.html`+`result.html`:
+
+- ✅ remove `market_opportunities` and add `competitor_reddit_summary` (with placeholder if empty)
+- ✅ Add outlink to open website in new window for each competitor
+- ✅ Add 'Powered by Paralel ultra8x' and show that MCP was used on reddit properties
+- ✅ Fonts/assets must be hosted here, not assets.p0web.com.
+- ✅ Add logo Parallel
+- Ensure assets preload.
+
+Other
+
+- ✅ My deps require MIT license.
 - Try get reddit client-id/secret and api key
-- Fonts/assets must be hosted here, not assets.p0web.com. Ensure they preload.
-- I think we should have a section in the blog for future improvement considerations or use-cases/opportunities, and maybe talk a bit about the business model or how creating public data could be an added value to existing businesses' customers, to inspire people to build with this. Also, the OSS README should be designed to get people to self host this in 5 minutes and easily change the task.schema.json to experiment and try different usecases. We should put a call to action since that's our goal: make people succeed in this use-case of Parallel. Also talk about other private data MCPs that could have high leverage here. (edited)
-- Add logo Parallel
+- The OSS README should be designed to get people to self host this in 5 minutes and easily change the task.schema.json to experiment and try different usecases.
 
 # BACKLOG
 

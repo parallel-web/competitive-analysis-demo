@@ -12,35 +12,35 @@
     <style>
         @font-face {
             font-family: 'FT System Mono';
-            src: url('https://assets.p0web.com/FTSystemMono-Regular.woff2') format('woff2');
+            src: url('/FTSystemMono-Regular.woff2') format('woff2');
             font-weight: 400;
             font-display: swap;
         }
 
         @font-face {
             font-family: 'FT System Mono';
-            src: url('https://assets.p0web.com/FTSystemMono-Medium.woff2') format('woff2');
+            src: url('/FTSystemMono-Medium.woff2') format('woff2');
             font-weight: 500;
             font-display: swap;
         }
 
         @font-face {
             font-family: 'FT System Mono';
-            src: url('https://assets.p0web.com/FTSystemMono-Bold.woff2') format('woff2');
+            src: url('/FTSystemMono-Bold.woff2') format('woff2');
             font-weight: 700;
             font-display: swap;
         }
 
         @font-face {
             font-family: 'Gerstner Programm';
-            src: url('https://assets.p0web.com/Gerstner-ProgrammRegular.woff2') format('woff2');
+            src: url('/Gerstner-ProgrammRegular.woff2') format('woff2');
             font-weight: 400;
             font-display: swap;
         }
 
         @font-face {
             font-family: 'Gerstner Programm';
-            src: url('https://assets.p0web.com/Gerstner-ProgrammMedium.woff2') format('woff2');
+            src: url('/Gerstner-ProgrammMedium.woff2') format('woff2');
             font-weight: 500;
             font-display: swap;
         }
@@ -535,7 +535,7 @@
         .parallel-symbol {
             width: 32px;
             height: 32px;
-            /* background: url('https://assets.p0web.com/dark-parallel-symbol-270.svg') no-repeat center; */
+            background: url('/dark-parallel-symbol-270.svg') no-repeat center;
             background-size: contain;
         }
 
@@ -842,6 +842,19 @@
         </div>
     </header>
 
+    <!-- Disclaimer -->
+    <div class="bg-gray-50 border-b border-gray-200 py-2">
+        <div class="content-wrapper text-center">
+            <p class="text-gray-600 text-xs">
+                Powered by
+                <a href="https://parallel.ai/blog/deep-research-benchmarks" target="_blank"
+                    class="text-signal hover:underline font-medium">
+                    Parallel ultra8x
+                </a>
+            </p>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <main class="py-12">
         <div class="content-wrapper">
@@ -1000,6 +1013,11 @@
                     <div class="analysis-card" id="reddit-analysis-card">
                         <!-- Reddit analysis will be injected here -->
                     </div>
+
+                    <!-- Competitor Reddit Summary -->
+                    <div class="analysis-card" id="competitor-reddit-summary-card">
+                        <!-- Competitor Reddit summary will be injected here -->
+                    </div>
                 </section>
 
                 <!-- Financial Analysis -->
@@ -1040,9 +1058,6 @@
                     </div>
                     <div class="analysis-card" id="recent-news-card">
                         <!-- Recent news will be injected -->
-                    </div>
-                    <div class="analysis-card" id="market-opportunities-card">
-                        <!-- Market opportunities will be injected -->
                     </div>
                 </section>
 
@@ -1202,6 +1217,7 @@
         }
 
         // Helper function to create competitor card
+        // Helper function to create competitor card
         function createCompetitorCard(competitor) {
             // Extract domain from website URL
             let domain = competitor.website || competitor.hostname;
@@ -1222,25 +1238,33 @@
             competitorLink.className = 'competitor-link';
 
             competitorLink.innerHTML = `
-                <div class="competitor-card cursor-pointer">
-                    <div class="flex items-start space-x-4">
-                        <div class="company-logo-container relative">
-                            <img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64" 
-                                 alt="${competitor.name} logo"
-                                 class="w-12 h-12 rounded object-cover border border-gray-300"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <div class="w-12 h-12 bg-gray-200 rounded hidden items-center justify-center font-bold text-gray-700 text-sm">
-                                ${competitor.name.charAt(0)}
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="gerstner text-lg font-medium mb-2">${competitor.name}</h3>
-                            <span class="text-signal hover:underline text-xs font-mono">${competitor.website || competitor.hostname}</span>
-                            <span class="text-signal text-xs">${competitor.description || ""}</span>
-                        </div>
+        <div class="competitor-card cursor-pointer">
+            <div class="flex items-start space-x-4">
+                <div class="company-logo-container relative">
+                    <img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64" 
+                         alt="${competitor.name} logo"
+                         class="w-12 h-12 rounded object-cover border border-gray-300"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="w-12 h-12 bg-gray-200 rounded hidden items-center justify-center font-bold text-gray-700 text-sm">
+                        ${competitor.name.charAt(0)}
                     </div>
                 </div>
-            `;
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="gerstner text-lg font-medium">${competitor.name}</h3>
+                        <a href="${competitor.website || `https://${competitor.hostname}`}" 
+                           target="_blank" 
+                           class="text-signal hover:text-orange-600 text-xs font-medium uppercase tracking-wide"
+                           onclick="event.stopPropagation();">
+                            Visit Site ↗
+                        </a>
+                    </div>
+                    <span class="text-signal hover:underline text-xs font-mono block mb-1">${competitor.website || competitor.hostname}</span>
+                    <span class="text-gray-600 text-xs">${competitor.description || ""}</span>
+                </div>
+            </div>
+        </div>
+    `;
 
             return competitorLink;
         }
@@ -1420,7 +1444,15 @@
             document.getElementById('reddit-analysis-card').innerHTML = createAnalysisCard(
                 result.target_company_reddit_analysis || 'No Reddit analysis available',
                 'target_company_reddit_analysis',
-                sentimentText
+                `Reddit Analysis <small class="text-gray-500 text-xs ml-2">(Powered by Reddit MCP)</small>` +
+                (sentimentClass ? ` <span class="sentiment-indicator ${sentimentClass}">${result.reddit_overall_sentiment} sentiment</span>` : '')
+            );
+
+            // Populate competitor Reddit summary
+            document.getElementById('competitor-reddit-summary-card').innerHTML = createAnalysisCard(
+                result.competitor_reddit_summary || 'No competitor Reddit summary available',
+                'competitor_reddit_summary',
+                `Competitor Reddit Analysis <small class="text-gray-500 text-xs ml-2">(Powered by Reddit MCP)</small>`
             );
 
             // Populate investment summary
@@ -1465,12 +1497,6 @@
                 'Recent News & Developments'
             );
 
-            // Populate market opportunities (moved under Understand the Market)
-            document.getElementById('market-opportunities-card').innerHTML = createAnalysisCard(
-                result.market_opportunities || 'No market opportunities analysis available',
-                'market_opportunities',
-                'Market Opportunities'
-            );
 
             // Populate competitive landscape overview
             document.getElementById('competitive-landscape-card').innerHTML = createAnalysisCard(

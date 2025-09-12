@@ -172,26 +172,6 @@ export default {
         const do_stub = env.COMPETITOR_ANALYSIS.get(do_id);
 
         switch (pathname) {
-          case "/migrate": {
-            if (!ADMIN_USERNAMES.includes(ctx.user?.username || "")) {
-              return new Response("Admin only", { status: 401 });
-            }
-
-            const result = await do_stub.handleMigrate();
-            return new Response(
-              JSON.stringify(
-                {
-                  message: "Migration completed",
-                  ...result,
-                },
-                null,
-                2
-              ),
-              {
-                headers: { "Content-Type": "application/json" },
-              }
-            );
-          }
           case "/admin": {
             if (!ADMIN_USERNAMES.includes(ctx.user?.username || "")) {
               return new Response("Admin only", { status: 401 });
@@ -226,7 +206,7 @@ export default {
             }
             if (pathname.startsWith("/md/")) {
               const hostname = pathname.replace("/md/", "");
-              return handleMd(hostname, do_stub);
+              return handleMd(request, hostname, do_stub);
             }
             if (pathname.startsWith("/og/")) {
               const hostname = pathname.replace("/og/", "");
@@ -585,18 +565,22 @@ function escapeXml(text: string): string {
 }
 
 async function handleMd(
+  request: Request,
   hostname: string,
   do_stub: DurableObjectStub<CompetitorAnalysisDO>
 ): Promise<Response> {
   const analysis = await do_stub.getAnalysis(hostname);
-
+  const url = new URL(request.url);
   if (
     !analysis ||
     analysis.status !== "done" ||
     analysis.error ||
     !analysis.result
   ) {
-    return new Response("Analysis not found or incomplete", { status: 404 });
+    return new Response(
+      `Analysis not found. Please go to ${url.origin}/new?company=${hostname} to add this company.`,
+      { status: 404 }
+    );
   }
 
   const result = JSON.parse(analysis.result);

@@ -2,7 +2,6 @@
   "$schema": "https://unpkg.com/wrangler@latest/config-schema.json",
   "name": "competitor-analysis",
   "main": "worker.ts",
-  "account_id": "aceab98f1a2fc658ed4e20bc307fa65a",
   "compatibility_date": "2025-08-14",
   "assets": { "directory": "./public" },
   "observability": { "logs": { "enabled": true } },
@@ -11,13 +10,14 @@
       { "name": "COMPETITOR_ANALYSIS", "class_name": "CompetitorAnalysisDO" }
     ]
   },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["CompetitorAnalysisDO"] }
+  ],
+  "account_id": "aceab98f1a2fc658ed4e20bc307fa65a",
   "routes": [
     {
       "custom_domain": true,
       "pattern": "competitive-analysis-demo.parallel.ai"
     }
-  ],
-  "migrations": [
-    { "tag": "v1", "new_sqlite_classes": ["CompetitorAnalysisDO"] }
   ]
 }
