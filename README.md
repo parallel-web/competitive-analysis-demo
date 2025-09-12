@@ -115,6 +115,9 @@ This choice helps us reduce complexity by removing the framework to HTML+JS+CSS 
 
 This increases accessibility for both humans and machines (such as browser-agents) as complex interactions may be harder to read programmatically which could hide crucial information to AI.
 
+<img width="1340" height="1168" alt="image" src="https://github.com/user-attachments/assets/15576826-c0a3-4608-a004-bf702136a32e" />
+
+
 ## **Implementation**
 
 ### **Dependencies and Environment Setup**
