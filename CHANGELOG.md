@@ -164,8 +164,8 @@ Schema
 Other
 
 - ✅ My deps require MIT license.
-- Try get reddit client-id/secret and api key
-- The OSS README should be designed to get people to self host this in 5 minutes and easily change the task.schema.json to experiment and try different usecases.
+- ✅ The OSS README should be designed to get people to self host this in 5 minutes and easily change the task.schema.json to experiment and try different usecases.
+- Try get reddit client-id/secret and API key
 
 # BACKLOG
 

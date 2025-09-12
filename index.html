@@ -282,23 +282,41 @@
                 padding: 0 16px;
             }
 
-            .search-input {
-                width: 150px;
-            }
-
-            body {
-                font-size: 13px;
+            /* Stack header elements vertically on mobile */
+            .header-content {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
             }
 
             .header-nav {
                 flex-direction: column;
-                gap: 16px;
-                align-items: flex-start;
+                gap: 8px;
+                align-items: stretch;
             }
 
             .search-form {
-                order: -1;
-                margin-bottom: 8px;
+                justify-content: space-between;
+            }
+
+            .search-input {
+                width: calc(100% - 80px);
+                flex: 1;
+                margin-right: 8px;
+            }
+
+            .search-btn {
+                flex-shrink: 0;
+                width: 70px;
+            }
+
+            .mobile-tagline {
+                text-align: center;
+                font-size: 11px;
+            }
+
+            body {
+                font-size: 13px;
             }
         }
     </style>
@@ -307,20 +325,23 @@
 <body class="min-h-screen">
     <!-- Header -->
     <header class="py-6 border-b-2 border-gray-200">
-        <div class="content-wrapper flex items-center justify-between">
-            <div class="header-logo">
-                <div class="parallel-symbol"></div>
-                <h1 class="gerstner text-xl font-medium hover:text-gray-600 ml-3">
-                    Competitor Analysis
-                </h1>
-            </div>
-            <div class="header-nav flex items-center space-x-4">
-                <form class="search-form" onsubmit="performSearch(event)">
-                    <input type="text" class="search-input" placeholder="Search categories, keywords..."
-                        id="search-query">
-                    <button type="submit" class="search-btn">Search</button>
-                </form>
-                <p class="text-gray-600 text-sm uppercase tracking-wide">AI-powered market research</p>
+        <div class="content-wrapper">
+            <div class="header-content flex items-center justify-between">
+                <div class="header-logo">
+                    <div class="parallel-symbol"></div>
+                    <h1 class="gerstner text-xl font-medium hover:text-gray-600 ml-3">
+                        Competitor Analysis
+                    </h1>
+                </div>
+                <div class="header-nav flex items-center space-x-4">
+                    <form class="search-form" onsubmit="performSearch(event)">
+                        <input type="text" class="search-input" placeholder="Search categories, keywords..."
+                            id="search-query">
+                        <button type="submit" class="search-btn">Search</button>
+                    </form>
+                    <p class="mobile-tagline text-gray-600 text-sm uppercase tracking-wide">AI-powered market research
+                    </p>
+                </div>
             </div>
         </div>
     </header>

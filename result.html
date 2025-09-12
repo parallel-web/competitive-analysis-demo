@@ -24,7 +24,6 @@
 
     <!-- Preload logo SVG -->
     <link rel="preload" href="/dark-parallel-symbol-270.svg" as="image" type="image/svg+xml">
-
     <style>
         @font-face {
             font-family: 'FT System Mono';
@@ -746,6 +745,46 @@
                 padding: 0 16px;
             }
 
+            /* Header mobile fixes */
+            header .content-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+
+            .header-logo {
+                justify-content: center;
+            }
+
+            .search-form {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .search-input {
+                width: 120px;
+                font-size: 11px;
+                padding: 6px 8px;
+            }
+
+            .search-btn {
+                font-size: 10px;
+                padding: 6px 8px;
+            }
+
+            /* Stack the search and back link on mobile */
+            header .content-wrapper>div:last-child {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+
+            /* Make back link smaller on mobile */
+            header .content-wrapper>div:last-child>a {
+                font-size: 11px;
+            }
+
             .company-header {
                 padding: 24px;
                 margin-bottom: 32px;
@@ -788,10 +827,6 @@
             .secondary-btn {
                 padding: 14px 24px;
                 font-size: 12px;
-            }
-
-            .search-input {
-                width: 150px;
             }
 
             .content-markdown table {
