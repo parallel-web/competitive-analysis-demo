@@ -1,6 +1,6 @@
 # **Building a Serverless Competitive Intelligence Platform with MCP \+ Task API**
 
-We built a full-stack competitive intelligence platform that automates company research, competitor discovery, and sentiment analysis. View the complete app here: https://competitive-analysis-demo.parallel.ai/
+We built a full-stack competitive intelligence platform by combining data from Reddit and the public web.  View the complete app here: https://competitive-analysis-demo.parallel.ai/
 
 https://github.com/user-attachments/assets/e40770d3-9716-4fde-8116-f356bb6e35d0
 
@@ -10,7 +10,7 @@ The app we built allows users to:
 
 - Authenticate
 - Enter a company domain
-- Kickoff a single Parallel `ultra8x` Task API configured with Reddit MCP tool calls. The complete Task API call is available [here](https://platform.parallel.ai/play?view=outputs&id=tspec_b9b024bc538649ceb3392a9ce13bc83a).
+- Kickoff a single Parallel `ultra8x` Task configured with Reddit MCP tool calls. The complete Task API call is available [here](https://platform.parallel.ai/play?view=outputs&id=tspec_b9b024bc538649ceb3392a9ce13bc83a).
 - Receive a detailed, shareable competitive analysis including Reddit sentiment, market research, investment history, feature parity and more
 - Recursively kick off additional analyses on competitors found
 - Access results in the UI or via a Competitive Analysis MCP Server with competitive analysis in a token-dense markdown format
@@ -90,7 +90,7 @@ Note: The Task API Spec is defined in \`public/task.schema.json\` \- modify this
 **Single Task API Call vs Web Research Pipeline**  
 Using the Task API provides the benefits of simplicity, quality and cost-effectiveness vs a typical web research pipeline. The Task API has been [benchmarked](https://parallel.ai/blog/deep-research-benchmarks) against other providers to provide the best-in-class quality at each price point. It also handles the end-to-end web research pipeline, removing the need to build a pipeline that includes reasoning, search, retrieval, ranking, compression and MCP tool call configuration.
 
-The `Ultra8x` processor was chosen out of each of the Task API [processor](https://docs.parallel.ai/task-api/core-concepts/choose-a-processor) options because the user experience is designed around latency, allowing for slower-running, more in-depth research. The `Ultra8x` processor can also handle 25 output fields, allowing for several questions to be answered about each company – covering Reddit sentiment, investment history, feature parity, competitor mapping and more in a single API call. This removes the need for piecing together several outputs into a final format.
+The `Ultra8x` processor was chosen out of each of the Task API [processor](https://docs.parallel.ai/task-api/core-concepts/choose-a-processor) options because the user experience is designed for asynchronous execution, allowing for slower-running, more in-depth research. The `Ultra8x` processor can also handle 25 output fields, allowing for several questions to be answered about each company – covering Reddit sentiment, investment history, feature parity, competitor mapping and more in a single API call. This removes the need for piecing together several outputs into a final format.
 
 **Reddit MCP as a Competitive Research Tool**  
 Reddit has long been considered a valuable resource for individuals to receive unfiltered reviews and advice on various products and companies. The Reddit sentiment surrounding a company is often a strong indicator of the sentiment in their broader user base. It is also an indicator of market presence and mindshare. This makes Reddit a great tool for competitive analysis. Combining comprehensive Reddit analysis with deep web research is unique and valuable for competitive insights.
